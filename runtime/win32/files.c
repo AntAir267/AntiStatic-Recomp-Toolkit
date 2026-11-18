@@ -339,8 +339,11 @@ static uint32_t create_file(const char *name, uint32_t access, uint32_t disp, co
     }
     int fd = open(host, fl | O_CLOEXEC, 0644);
     if (fd < 0) {
+        int e = errno;
+        if (e == EMFILE || e == ENFILE)
+            LOG(LOG_ALWAYS, "%s(\"%s\") -> failed: too many files open (the host's open-file limit)", fn, name);
         LOG(LOG_FILE, "%s(\"%s\", %x, disp %u) -> failed (%s)", fn, name, access, disp, host);
-        set_last_error(errno == ENOENT ? 2 : errno == EEXIST ? 80 : 5);
+        set_last_error(e == ENOENT ? 2 : e == EEXIST ? 80 : e == EMFILE || e == ENFILE ? 4 : 5);
         return 0xffffffffu;
     }
     struct stat st;

@@ -12,6 +12,9 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/mman.h>
+#ifndef _WIN32
+#include <sys/resource.h>
+#endif
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
@@ -1343,6 +1346,18 @@ int main(int argc, char **argv)
     sigaction(SIGBUS, &sa, NULL);
     sigaction(SIGFPE, &sa, NULL);
     sigaction(SIGILL, &sa, NULL);
+#ifndef _WIN32
+    /* Windows has no open-file limit a game would meet, and each open guest file is one host
+       descriptor here: the usual soft limit of 1,024 stops a game that keeps a few thousand open
+       (one keeps 2,025 after loading). Raise it to the hard limit. */
+    struct rlimit rl;
+    if (getrlimit(RLIMIT_NOFILE, &rl) == 0 && rl.rlim_cur < rl.rlim_max) {
+        rlim_t was = rl.rlim_cur;
+        rl.rlim_cur = rl.rlim_max;
+        if (setrlimit(RLIMIT_NOFILE, &rl) == 0)
+            LOG(LOG_FILE, "open-file limit raised from %llu to %llu", (unsigned long long)was, (unsigned long long)rl.rlim_max);
+    }
+#endif
 
     options_load();
     for (int k = 0; k < ncli && k < 16; k++)

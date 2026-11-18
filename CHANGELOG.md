@@ -3,6 +3,16 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.40 (2026-11-18)
+
+- **Start-up raises the open-file limit** (Linux) from the soft limit to the hard one. Each open
+  guest file is one host descriptor, and the usual soft limit of 1,024 stopped a game that keeps
+  2,025 files open after loading (Nitronic Rush on two PCs with the usual limit: 848 "failed to open", then a
+  crash). Windows has no such limit. Logged under `--log file`.
+- Running out of descriptors anyway is logged always ("too many files open") and answers
+  ERROR_TOO_MANY_OPEN_FILES (4) instead of ERROR_ACCESS_DENIED.
+- No regenerate. A port that raises the limit itself (Nitronic Rush's game_init) can drop that.
+
 ## v0.2.39 (2026-11-18)
 
 - **The D3D9 bridge applies options `anisotropic` and `shadow_filter` while the game runs**, so a
