@@ -1,0 +1,43 @@
+The AntiStatic Recomp Toolkit's own code is released under the Unlicense (LICENSE). These files
+come from other projects and keep their licences:
+
+tools/coverage/score_recovery.py, tools/coverage/pdb2_ref.py, tools/coverage/map_names.py
+    from pcrecomp (https://github.com/sp00nznet/pcrecomp), MIT License,
+    Copyright (c) 2026 sp00nz. The licence text is tools/coverage/LICENSE.pcrecomp; the commit
+    they were taken from is in tools/coverage/PCRECOMP_COMMIT.
+
+tests/selftest/pcrecomp_cases.s, tests/selftest/pcrecomp_cases.json
+    pcrecomp's lifter test cases (tools/lift/difftest.py: code bytes, start states, undefined
+    flags), converted by tests/selftest/import_pcrecomp.py; MIT License, Copyright (c) 2026
+    sp00nz (tools/coverage/LICENSE.pcrecomp); the commit is in pcrecomp_cases.json.
+
+runtime/win32/dosmask.h, tests/dosmask/test.c
+    SwARc's MatchFileMask / MatchDosExpression and its table of Windows' answers
+    (https://github.com/JTM-rootstorm/SwARc, commit 3c396d3), rewritten in C; MIT License,
+    Copyright (c) 2026 JT. The licence text is runtime/win32/LICENSE.SwARc.
+
+third_party/dmusic
+    GothicKit's DirectMusic (https://github.com/GothicKit/dmusic), MIT License, Copyright (c)
+    2024 GothicKit Contributors (third_party/dmusic/LICENSE.md), with TinySoundFont (MIT, its
+    licence in vendor/TinySoundFont); li2-native's patched copy (changes marked "li2-rip").
+
+third_party/dxvk
+    patches to DXVK 3.1.1 (https://github.com/doitsujin/dxvk, zlib/libpng licence, Copyright (c)
+    2017 Philip Rebohle, (c) 2019 Joshua Ashton, (c) 2019 Robin Kertels, (c) 2023 Jeffrey Ellison)
+    and its dxbc-spirv subproject (MIT, Copyright (c) 2025 Philip Rebohle), under those licences;
+    DXVK's own source is not included (third_party/dxvk/README.md).
+
+third_party/stb_vorbis
+    stb_vorbis v1.22 by Sean Barrett (https://github.com/nothings/stb), MIT or public domain
+    at the user's choice (third_party/stb_vorbis/LICENSE.txt); taken under the public-domain
+    alternative.
+
+Optional, not included: AMD FidelityFX Super Resolution 2 (MIT) and NVIDIA's DLSS SDK (its own
+licence) are only built where a port supplies their source; runtime/d3d7/fsr2.h and dlss.h are
+our interfaces to them.
+
+Ideas taken without code (credited in the files that use them): SwARc's x87 oracle testing, its
+frame pacer, its thread, handle and TLS fixes (https://github.com/JTM-rootstorm/SwARc, MIT) in
+tests/selftest and runtime/win32; pcrecomp's repository audit in tools/audit_public.py and its
+lifter findings in runtime/cpu; recomp-kit's stub game and clock-spin guard
+(https://github.com/veritr1x/recomp-kit, MIT) in tests/stubgame and runtime/win32/pacing.c.
