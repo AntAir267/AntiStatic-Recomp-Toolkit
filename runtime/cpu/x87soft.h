@@ -1,8 +1,8 @@
 /* PORTABLE x87 TRANSCENDENTALS (PORT_X87_PORTABLE, fpu.c): fsin, fcos, fsincos, fptan, fpatan,
    f2xm1, fyl2x and fyl2xp1 by the host's basic arithmetic alone (+ - * / sqrt, which IEEE fixes
    bit for bit), so a run gives the same results on every x86 CPU. The host's own instructions
-   differ between Intel and AMD in the last bits (all eight, measured 2026-11-18: Penguin's i3 and
-   PHX-STUDIO's i9 against the Win Max's Ryzen), which made recorded runs depend on the PC.
+   differ between Intel and AMD in the last bits (all eight, measured 2026-11-18: an i3-10100F and an
+   i9-10900K against a Ryzen AI 9 HX 370), which made recorded runs depend on the PC.
    Computed in the full 64-bit significand with round-to-nearest (the host's control word is set for
    it and put back): within a few units in the last place of the 80-bit result, as the hardware is.
    Zeros, infinities, NaNs and the undefined ranges keep the hardware path's answer, which the x87
