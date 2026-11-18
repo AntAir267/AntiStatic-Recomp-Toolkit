@@ -441,6 +441,31 @@ static int shadow_filter_opt(void)
     return n == 3 || n == 5 || n == 7 ? n : 0;
 }
 
+/* option anisotropic = off | 2 | 4 | 8 | 16: the level, or -1 (the game's own) */
+static int anisotropic_opt(void)
+{
+    int an = atoi(option_str("anisotropic", PORT_D3D9_ANISOTROPIC));
+    return an == 2 || an == 4 || an == 8 || an == 16 ? an : -1;
+}
+
+/* Both applied while the game runs (a row in its own Video Options: Stranglehold), through DXVK's
+   DXVK_D3D9SetSamplerAnisotropy / DXVK_D3D9SetShadowFilter on the device (third_party/dxvk/
+   dxvk-live-options.patch; a DXVK without the patch takes them at the next start). From L.A. Rush's
+   d3d9.c. Called by options_changed() (options.c) */
+static void (*dxvk_set_aniso)(void *, int32_t), (*dxvk_set_shadow)(void *, int32_t);
+static void *dxvk_device;               /* the device DXVK made (not a port's own renderer's) */
+void d3d9_options(void)
+{
+    if (!dxvk_device)
+        return;
+    if (dxvk_set_aniso)
+        dxvk_set_aniso(dxvk_device, anisotropic_opt());
+    if (dxvk_set_shadow)
+        dxvk_set_shadow(dxvk_device, shadow_filter_opt());
+    LOG(LOG_ALWAYS, "options: anisotropic %d, shadow filter %d%s", anisotropic_opt(), shadow_filter_opt(),
+        dxvk_set_aniso ? "" : " (this DXVK takes them at the next start)");
+}
+
 API(D3D9, Direct3DCreate9, 1)
 {
     /* the port's own renderer if it gives one (etm-native: option renderer = vulkan): the same COM
@@ -476,10 +501,9 @@ API(D3D9, Direct3DCreate9, 1)
            stay sharp at a slant; option shadow_filter (above); the port's own settings after them */
         {
             static char conf[1024];
-            int an = atoi(option_str("anisotropic", PORT_D3D9_ANISOTROPIC));
+            int an = anisotropic_opt();
             int sf = shadow_filter_opt();
             const char *more = port_d3d9_dxvk_config();
-            if (an != 2 && an != 4 && an != 8 && an != 16) an = -1;
             /* (a hidden window, --hidden, is never shown: presenting without waiting for the
                screen keeps a compositor that never draws it from holding the frame up) */
             snprintf(conf, sizeof conf, "d3d9.samplerAnisotropy = %d; d3d9.shadowFilter = %d;%s%s%s", an, sf,
@@ -492,6 +516,8 @@ API(D3D9, Direct3DCreate9, 1)
         dxvk_create9 = (void *(*)(UINT))dlsym(dxvk, "Direct3DCreate9");
         if (!dxvk_create9)
             fatal("DXVK has no Direct3DCreate9");
+        dxvk_set_aniso = (void (*)(void *, int32_t))dlsym(dxvk, "DXVK_D3D9SetSamplerAnisotropy");
+        dxvk_set_shadow = (void (*)(void *, int32_t))dlsym(dxvk, "DXVK_D3D9SetShadowFilter");
         d3d_classes_init();
     }
     if (!host_sdl_window())
@@ -517,6 +543,7 @@ HOSTFN(sp_IDirect3D9_CreateDevice, 7)
         (HRESULT (*)(void *, UINT, D3DDEVTYPE, HWND, DWORD, D3DPRESENT_PARAMETERS *, void **))VT(self)[16];
     uint32_t r = (uint32_t)create(self, ARG(1), (D3DDEVTYPE)ARG(2), d3d_hwnd(ARG(3)), flags | D3DCREATE_FPU_PRESERVE, &pp, &dev);
     if ((int32_t)r >= 0) msaa_device(dev);
+    if ((int32_t)r >= 0 && !alt_renderer) dxvk_device = dev;
     LOG(LOG_ALWAYS, "CreateDevice(adapter %u, type %u, flags %x) -> %08x", ARG(1), ARG(2), flags, r);
     pp_out(ARG(5), &pp);
     if (ARG(6)) W32(ARG(6), (int32_t)r >= 0 ? d3d_wrap_new(DK_IDirect3DDevice9, dev) : 0);

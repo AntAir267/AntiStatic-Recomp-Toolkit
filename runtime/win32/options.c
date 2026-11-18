@@ -223,5 +223,8 @@ void options_changed(void)
     pad_options();
     if (win_options)
         win_options();
+    extern void d3d9_options(void) __attribute__((weak));   /* (the D3D9 bridge, when linked) */
+    if (d3d9_options)
+        d3d9_options();
     port_options_changed();
 }
