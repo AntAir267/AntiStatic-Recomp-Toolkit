@@ -3,6 +3,15 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.44 (2026-11-18)
+
+- **Miles, under `PORT_MILES_COPY_SAMPLES`: streams as LEGO Island 2's runs had them** (its town
+  route, frame 6275). AIL_open_stream sets the stream's gain when it makes the voice, and the
+  once-a-frame `mss_frame` looks at each playing stream's status and calls the stream's
+  AIL_register_stream_callback callback when it has ended (li2-native's mss_frame). Each look reads
+  the `--test` clock. Without the setting nothing changes (streams still never call back).
+- No regenerate.
+
 ## v0.2.43 (2026-11-18)
 
 L.A. Rush's open gaps 3, 4, 5, 7, 8 and 9, in the shapes its chat asked for:

@@ -432,13 +432,27 @@ static uint32_t total_frames(const Obj *o)
     return o->len / (uint32_t)(ch * (o->type & DIG_F_16BITS ? 2 : 1));
 }
 
-/* the game thread, once a frame: 3D gains follow the listener */
+/* the game thread, once a frame: 3D gains follow the listener. Under PORT_MILES_COPY_SAMPLES (LEGO
+   Island 2's recorded runs, as li2-native's mss_frame) each playing stream's status is also looked
+   at, and a stream that has ended calls its AIL_register_stream_callback callback (stdcall, the
+   stream's handle); each look reads the --test clock. */
 void mss_frame(void)
 {
+#if defined(PORT_MILES_COPY_SAMPLES)
+    CPU *c = current_cpu();
+#endif
     for (int i = 1; i < MAXOBJ; i++) {
         Obj *o = &objs[i];
-        if (o->used && o->kind == K_3DSAMPLE && o->status == SMP_PLAYING)
+        if (!o->used)
+            continue;
+        if (o->kind == K_3DSAMPLE && o->status == SMP_PLAYING)
             apply_gain(o);
+#if defined(PORT_MILES_COPY_SAMPLES)
+        if (o->kind == K_STREAM && o->status == SMP_PLAYING && status_of(o) == SMP_DONE && o->callback && c) {
+            LOGS("AIL stream %08x ended: callback %08x", o->handle, o->callback);
+            guest_call(c, o->callback, 1, o->handle);
+        }
+#endif
     }
 }
 
@@ -1356,6 +1370,10 @@ AIL(open_stream, 12)
     o->type = DIG_F_16BITS | (ch == 2 ? DIG_F_STEREO : 0);
     o->rate = (uint32_t)rate;
     o->voice = voice_new(pcm, frames, ch, rate);
+#if defined(PORT_MILES_COPY_SAMPLES)
+    if (o->voice >= 0)
+        apply_gain(o);                  /* (li2-native's set_pcm: the gain when the stream is made) */
+#endif
     LOGS("AIL_open_stream(%s): %u frames, %d ch, %d Hz", win, frames, ch, rate);
     return h;
 }
@@ -1432,7 +1450,8 @@ AIL(3D_position, 16)
     return 0;
 }
 AIL(set_stream_pan, 8) { Obj *o = obj_get(ARG(0), K_STREAM); if (o) { o->pan = (float)(int32_t)ARG(1) / 127.0f; apply_gain(o); } return 0; }
-/* (stream, callback): the old callback (never called: streams are decoded whole) */
+/* (stream, callback): the old callback (called when the stream ends under PORT_MILES_COPY_SAMPLES,
+   from mss_frame; otherwise never) */
 AIL(register_stream_callback, 8)
 {
     Obj *o = obj_get(ARG(0), K_STREAM);
