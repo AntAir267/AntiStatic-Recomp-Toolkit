@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include "runtime.h"
 
-#define COM_MAGIC 0x4d4f4321u    /* "!COM" */
 
 void com_class_init(ComClass *cls, const char *iface, int n, void (*const *methods)(CPU *),
                     const char *const *names)
@@ -24,10 +23,12 @@ void com_class_init(ComClass *cls, const char *iface, int n, void (*const *metho
    Fixed chunks that never move, the count published last: com_host reads without the lock, and a
    table realloc'd by another thread making an object (Direct3D wrappers) was read after it was
    freed (LIXS's real-time crash, FIXES.md 2026-11-06; its fix). */
-#define HOST_CHUNK 4096
+#define HOST_CHUNK COM_HOST_CHUNK
 #define HOST_CHUNKS 1024
-static void **hosts[HOST_CHUNKS];
-static uint32_t nhosts;
+#define hosts com_hosts
+#define nhosts com_nhosts
+void **com_hosts[HOST_CHUNKS];
+uint32_t com_nhosts;
 static pthread_mutex_t hlock = PTHREAD_MUTEX_INITIALIZER;
 
 uint32_t com_new(ComClass *cls, void *host)
@@ -54,12 +55,10 @@ void com_set_class(uint32_t obj, ComClass *cls)
     W32(obj, cls->vtbl);
 }
 
-void *com_host(uint32_t obj)
+/* (com_host itself is inline, runtime.h: every COM call goes through it) */
+void com_host_bad(uint32_t obj)
 {
-    uint32_t id = obj ? R32(obj + 8) : 0;
-    if (!obj || R32(obj + 4) != COM_MAGIC || id >= __atomic_load_n(&nhosts, __ATOMIC_ACQUIRE))
-        fatal("not a runtime COM object: %08x", obj);
-    return hosts[id / HOST_CHUNK][id % HOST_CHUNK];
+    fatal("not a runtime COM object: %08x", obj);
 }
 
 int guid_eq(uint32_t a, uint32_t d1, uint16_t d2, uint16_t d3, const uint8_t d4[8])

@@ -22,13 +22,32 @@ static int in_list(const char *s, uint32_t a)
     return 0;
 }
 
-/* option decomp = on | off; <PORT_ENV>_DECOMP_OFF=addr,addr,... (hex) or all */
+/* A port's named sets of rewrites (L.A. Rush's "core": the frame and the game-state machine, the
+   reference for its two-player A/B runs): the rewrites a name keeps on, as a hex comma list, or
+   NULL for a name the port doesn't have. */
+__attribute__((weak)) const char *port_rewrite_subset(const char *name)
+{
+    (void)name;
+    return NULL;
+}
+
+/* option decomp = on | off | a port's subset name (only those on); <PORT_ENV>_DECOMP_OFF=addr,addr,...
+   (hex) or all, switched off on top */
 int decomp_enabled(uint32_t fn)
 {
     static int all = -1;
-    if (all < 0)
-        all = strcasecmp(option_str("decomp", "on"), "off") != 0;
-    return all && !in_list(port_getenv("DECOMP_OFF"), fn);
+    static const char *only;
+    if (all < 0) {
+        const char *v = option_str("decomp", "on");
+        all = strcasecmp(v, "off") != 0;
+        if (all && strcasecmp(v, "on")) {
+            only = port_rewrite_subset(v);
+            if (!only)
+                fatal("option decomp = %s: the port has no such set of rewrites (on, off or one of its own)", v);
+            LOG(LOG_ALWAYS, "rewrites: only the set \"%s\" (%s)", v, only);
+        }
+    }
+    return all && (!only || in_list(only, fn)) && !in_list(port_getenv("DECOMP_OFF"), fn);
 }
 
 void stackfix_clear(CPU *c, uint32_t size)

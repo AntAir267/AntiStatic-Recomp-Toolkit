@@ -99,8 +99,6 @@ static void ent_del(Ent *e)
     }
 }
 
-void *d3d_host(uint32_t guest) { return com_host(guest); }
-void *d3d_host_or_null(uint32_t guest) { return guest ? com_host(guest) : NULL; }
 
 static Ent *ent_of_guest(uint32_t guest)
 {

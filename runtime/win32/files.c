@@ -221,11 +221,21 @@ __attribute__((weak)) int port_find_extra(const char *rel, char (*names)[64], in
     return 0;
 }
 
+/* A port's own place for a game file it reads, before every other (L.A. Rush's overlays): rel as for
+   port_file_extra; 1 with the host path in out. Writes still go to the user folder. */
+__attribute__((weak)) int port_file_redirect(const char *rel, char *out, size_t n)
+{
+    (void)rel; (void)out; (void)n;
+    return 0;
+}
+
 int path_to_host(const char *win, char *out, size_t n, int for_write)
 {
     char rel[1024];
     int outside;
     to_relative(win, rel, sizeof rel, &outside);
+    if (!outside && !for_write && port_file_redirect(rel, out, n))
+        return 1;
     char user_path[2048], game_path[2048];
     if (outside == 2 && !for_write)
         return resolve_ci(cd_dir, rel, out, n);      /* the CD */
@@ -314,7 +324,12 @@ static uint32_t create_file(const char *name, uint32_t access, uint32_t disp, co
         return 0xffffffffu;
     }
     int keep = disp == 3 /* OPEN_EXISTING */ || disp == 4 /* OPEN_ALWAYS */;
-    int exists = path_to_host(name, host, sizeof host, writing ? (keep ? 2 : 1) : 0);
+    /* CREATE_NEW / CREATE_ALWAYS / TRUNCATE_EXISTING make or empty the file whatever the access, and
+       OPEN_ALWAYS makes one that is nowhere: in the user folder, never the game folder's */
+    int makes = writing || disp == 1 || disp == 2 || disp == 5;
+    int exists = path_to_host(name, host, sizeof host, makes ? (keep ? 2 : 1) : 0);
+    if (!makes && disp == 4 && !exists)
+        path_to_host(name, host, sizeof host, 1);
     /* Windows' answers by whether the file was there before (CreateFile's documentation; from
        larush-native): CREATE_NEW fails with ERROR_FILE_EXISTS if it was; OPEN_EXISTING and
        TRUNCATE_EXISTING fail with ERROR_FILE_NOT_FOUND if it wasn't; CREATE_ALWAYS and OPEN_ALWAYS
@@ -564,7 +579,11 @@ static int move_file(const char *src, const char *dst)
 {
     char from[2048], to[2048];
     int exists = path_to_host(src, from, sizeof from, 0);
-    path_to_host(dst, to, sizeof to, 1);
+    if (exists && path_to_host(dst, to, sizeof to, 1)) {
+        LOG(LOG_FILE, "MoveFile(\"%s\", \"%s\") -> 0 (the target exists)", src, dst);
+        set_last_error(183);                    /* (Windows: ERROR_ALREADY_EXISTS, the target kept) */
+        return 0;
+    }
     char user[2048];
     snprintf(user, sizeof user, "%s/", user_dir);
     int ok = 0;
@@ -612,13 +631,20 @@ API(KERNEL32, GetTempFileNameA, 4)
 {
     static unsigned counter = 1;
     const char *dir = gstr(ARG(0)), *pre = gstr(ARG(1));
-    unsigned u = ARG(2) ? ARG(2) & 0xffff : counter++;
+    unsigned u = ARG(2) & 0xffff;
     char name[600];
     snprintf(name, sizeof name, "%s\\%.3s%X.TMP", dir, pre ? pre : "", u);
     if (!ARG(2)) {
+        /* Windows takes the next number whose file is nowhere and makes it (an empty file) */
         char host[2048];
-        path_to_host(name, host, sizeof host, 1);
-        int fd = open(host, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        int tries = 0;
+        do {
+            u = counter++ & 0xffff;
+            if (!u)
+                u = counter++ & 0xffff;
+            snprintf(name, sizeof name, "%s\\%.3s%X.TMP", dir, pre ? pre : "", u);
+        } while (path_to_host(name, host, sizeof host, 1) && ++tries < 0xffff);
+        int fd = open(host, O_WRONLY | O_CREAT | O_EXCL, 0644);
         if (fd >= 0) close(fd);
     }
     gstrncpy(ARG(3), name, 260);
@@ -849,9 +875,9 @@ API(KERNEL32, SetFileAttributesW, 2) { char b[1024]; return get_attrs(gwstr(ARG(
 static int make_dir(const char *win)
 {
     char host[2048];
-    path_to_host(win, host, sizeof host, 1);
-    int ok = mkdir(host, 0755) == 0;
-    if (!ok) set_last_error(errno == EEXIST ? 183 : 3);
+    int existed = path_to_host(win, host, sizeof host, 1);    /* (the user folder's, or a game folder's) */
+    int ok = !existed && mkdir(host, 0755) == 0;
+    if (!ok) set_last_error(existed || errno == EEXIST ? 183 : 3);
     LOG(LOG_FILE, "CreateDirectory(\"%s\") -> %d", win, ok);
     return ok;
 }

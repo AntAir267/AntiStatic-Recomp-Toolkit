@@ -31,8 +31,9 @@ void d3d_present_done(void);                 /* frame_presented() outside the de
     static void fname(CPU *c) { d3d_lock(); uint32_t _r = fname##_body(c); d3d_unlock(); api_return(c, _r, nargs); } \
     static uint32_t fname##_body(CPU *c)
 
-void *d3d_host(uint32_t guest);              /* the DXVK object behind a program object */
-void *d3d_host_or_null(uint32_t guest);
+/* the DXVK object behind a program object (inline, as com_host) */
+static inline void *d3d_host(uint32_t guest) { return com_host(guest); }
+static inline void *d3d_host_or_null(uint32_t guest) { return guest ? com_host(guest) : NULL; }
 uint32_t d3d_wrap(int kind, void *host);     /* the program object for a DXVK object (one each) */
 uint32_t d3d_wrap_new(int kind, void *host); /* the same for an object just created */
 void *d3d_hwnd(uint32_t hwnd);               /* a window handle as DXVK takes it (SDL_Window *) */
