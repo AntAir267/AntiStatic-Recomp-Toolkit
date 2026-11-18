@@ -3,6 +3,17 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.39 (2026-11-18)
+
+- **The D3D9 bridge applies options `anisotropic` and `shadow_filter` while the game runs**, so a
+  port can put them in the game's own video options (Stranglehold).
+  - On `options_changed()` the bridge calls DXVK's `DXVK_D3D9SetSamplerAnisotropy` and
+    `DXVK_D3D9SetShadowFilter` on the device DXVK made, when the DXVK build exports them
+    (third_party/dxvk/dxvk-live-options.patch; without the patch they still take effect at the next
+    start).
+  - From L.A. Rush's d3d9.c.
+  - Compiles; not run in a game here. The stub game passes and its Windows build links.
+
 ## v0.2.38 (2026-11-18)
 
 Ready to publish:
