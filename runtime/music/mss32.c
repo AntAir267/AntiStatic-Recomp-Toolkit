@@ -210,6 +210,8 @@ static void free_voice(Obj *o)
 
 static int channels_of(const Obj *o) { return o->type & DIG_F_STEREO ? 2 : 1; }
 
+static void apply_gain(Obj *o);
+
 /* a voice for what the sample was given (at start) */
 static void make_voice(Obj *o)
 {
@@ -241,8 +243,13 @@ static void make_voice(Obj *o)
         o->voice = voice_new_guest(o->addr, o->len, ch, o->type & DIG_F_16BITS ? 16 : 8, (int)o->rate);
 #endif
     }
+#if defined(PORT_MILES_COPY_SAMPLES)
+    if (o->voice >= 0)                  /* (li2-native's set_pcm: the gain; voice_new set the rate) */
+        apply_gain(o);
+#else
     if (o->voice >= 0 && o->rate)
         voice_set_rate(o->voice, o->rate);
+#endif
 }
 
 /* the 3D listener's view of a sample: gain and the left/right balance */
@@ -269,8 +276,6 @@ static void place_3d(const Obj *o, float *g, float *pan)
             *pan = (d[0] * r[0] + d[1] * r[1] + d[2] * r[2]) / (rl * dist);
     }
 }
-
-static void apply_gain(Obj *o);
 
 /* SAMPLE CLASSES (the port's volume sliders): 0 effects, 1 music (streams), 2.. the port's own */
 #define MILES_CLASSES 8
@@ -934,9 +939,19 @@ static int wav_parse(uint32_t img, uint32_t *fmt, uint32_t *ch, uint32_t *rate, 
 static int set_file(Obj *o, uint32_t img)
 {
     uint32_t fmt = 0, ch = 0, rate = 0, bits = 0, align = 0, data = 0, len = 0, samples = 0;
+#if defined(PORT_MILES_COPY_SAMPLES)
+    /* the old voice is freed as the new one is made, not paused and rewound first (li2-native's
+       set_pcm: each of those reads the --test clock, and LEGO Island 2's town route counts them) */
+    o->status = SMP_DONE;
+    o->ended = 0;
+#else
     end(o);
+#endif
     o->addr = o->len = 0;
     if (!wav_parse(img, &fmt, &ch, &rate, &bits, &align, &data, &len, &samples)) {
+#if defined(PORT_MILES_COPY_SAMPLES)
+        free_voice(o);
+#endif
         set_error("not a WAV image");
         return 0;
     }
@@ -951,6 +966,9 @@ static int set_file(Obj *o, uint32_t img)
         o->type = DIG_F_ADPCM | DIG_F_16BITS | (ch == 2 ? DIG_F_STEREO : 0);
     else {
         LOGS("sample file: format %u, %u bits, %u ch not supported", fmt, bits, ch);
+#if defined(PORT_MILES_COPY_SAMPLES)
+        free_voice(o);
+#endif
         set_error("unsupported format");
         o->addr = o->len = 0;
         return 0;
