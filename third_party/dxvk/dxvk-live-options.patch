@@ -1,0 +1,106 @@
+--- a/src/d3d9/d3d9.sym
++++ b/src/d3d9/d3d9.sym
+@@ -2,6 +2,8 @@
+   global:
+     Direct3DCreate9;
+     Direct3DCreate9Ex;
++    DXVK_D3D9SetSamplerAnisotropy;
++    DXVK_D3D9SetShadowFilter;
+     D3DPERF_BeginEvent;
+     D3DPERF_EndEvent;
+     D3DPERF_SetMarker;
+--- a/src/d3d9/d3d9_device.cpp
++++ b/src/d3d9/d3d9_device.cpp
+@@ -7226,7 +7226,8 @@
+       cIsMultiMip = tex && (tex->Desc()->MipLevels > 1u),
+       cIsDepth    = bool(m_textureSlotTracking.depth & (1u << Sampler)),
+       cView       = std::move(imageView),
+-      cBindId     = m_samplerBindCount
++      cBindId     = m_samplerBindCount,
++      cAniso      = m_d3d9Options.samplerAnisotropy
+     ] (DxvkContext* ctx) {
+       DxvkSamplerKey key = { };
+ 
+@@ -7258,8 +7259,8 @@
+         uint32_t anisotropy = cState.minFilter == D3DTEXF_ANISOTROPIC
+           ? cState.maxAnisotropy : 0u;
+ 
+-        if (m_d3d9Options.samplerAnisotropy != -1 && cState.minFilter > D3DTEXF_POINT)
+-          anisotropy = m_d3d9Options.samplerAnisotropy;
++        if (cAniso != -1 && cState.minFilter > D3DTEXF_POINT)
++          anisotropy = cAniso;
+ 
+         key.setAniso(anisotropy);
+ 
+@@ -7313,6 +7314,26 @@
+   }
+ 
+ 
++  void D3D9DeviceEx::SetLiveSamplerAnisotropy(int32_t Anisotropy) {
++    D3D9DeviceLock lock = LockDevice();
++
++    if (m_d3d9Options.samplerAnisotropy == Anisotropy)
++      return;
++
++    m_d3d9Options.samplerAnisotropy = Anisotropy;
++    // every sampler made again at its next use, with the new anisotropy
++    m_textureSlotTracking.samplerStateDirty |= (1u << caps::MaxTextures) - 1u;
++  }
++
++
++  void D3D9DeviceEx::SetLiveShadowFilter(int32_t Filter) {
++    D3D9DeviceLock lock = LockDevice();
++    // (shaders created from now on: the runtime makes the ones it needs again)
++    m_d3d9Options.shadowFilter = Filter;
++    m_shaderOptions.shadowFilter = uint8_t(std::clamp(Filter, 0, 7));
++  }
++
++
+   void D3D9DeviceEx::UndirtySamplers(uint32_t mask) {
+     EnsureSamplerLimit();
+ 
+--- a/src/d3d9/d3d9_device.h
++++ b/src/d3d9/d3d9_device.h
+@@ -1063,6 +1063,12 @@
+       return &m_d3d9Options;
+     }
+ 
++    // LA Rush native (dxvk-live-options.patch): d3d9.samplerAnisotropy and d3d9.shadowFilter
++    // changed while running, from the game's options menu
++    void SetLiveSamplerAnisotropy(int32_t Anisotropy);
++
++    void SetLiveShadowFilter(int32_t Filter);
++
+     Direct3DState9* GetRawState() {
+       return &m_state;
+     }
+--- a/src/d3d9/d3d9_main.cpp
++++ b/src/d3d9/d3d9_main.cpp
+@@ -4,6 +4,7 @@
+ #include "d3d9_shader_validator.h"
+ 
+ #include "d3d9_annotation.h"
++#include "d3d9_device.h"
+ 
+ class D3DFE_PROCESSVERTICES;
+ using PSGPERRORID = UINT;
+@@ -39,6 +40,19 @@
+     return dxvk::CreateD3D9(true, ppDirect3D9Ex, nullptr, 0);
+   }
+ 
++  // LA Rush native (dxvk-live-options.patch): the device's sampler anisotropy (-1: the game's
++  // own) and shadow-map filter (0: the game's own; shaders created afterwards) changed while
++  // running. pDevice: a device CreateDevice returned.
++  DLLEXPORT void __stdcall DXVK_D3D9SetSamplerAnisotropy(IDirect3DDevice9* pDevice, int32_t Anisotropy) {
++    if (pDevice)
++      static_cast<dxvk::D3D9DeviceEx*>(static_cast<IDirect3DDevice9Ex*>(pDevice))->SetLiveSamplerAnisotropy(Anisotropy);
++  }
++
++  DLLEXPORT void __stdcall DXVK_D3D9SetShadowFilter(IDirect3DDevice9* pDevice, int32_t Filter) {
++    if (pDevice)
++      static_cast<dxvk::D3D9DeviceEx*>(static_cast<IDirect3DDevice9Ex*>(pDevice))->SetLiveShadowFilter(Filter);
++  }
++
+   DLLEXPORT int __stdcall D3DPERF_BeginEvent(D3DCOLOR col, LPCWSTR wszName) {
+     return dxvk::D3D9GlobalAnnotationList::Instance().BeginEvent(col, wszName);
+   }

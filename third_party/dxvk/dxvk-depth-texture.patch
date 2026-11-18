@@ -1,0 +1,45 @@
+--- a/src/d3d9/d3d9_device.cpp
++++ b/src/d3d9/d3d9_device.cpp
+@@ -1261,6 +1261,13 @@
+     // We don't know what garbage could be in the X8 data.
+     bool similar = AreFormatsSimilar(srcFormat, dstFormat);
+ 
++    // A depth buffer copied or resolved into a texture that samples as depth (INTZ, DF24, DF16)
++    // of the same Vulkan format: a post pass's view of the scene's depth (larush-native,
++    // runtime/d3d9_ao.c), which D3D9 itself cannot give for a multisampled depth buffer
++    bool depthToTexture = IsDepthFormat(srcFormat) && IsDepthFormat(dstFormat)
++      && !dstTextureInfo->IsShadow() && srcImage->info().format == dstImage->info().format;
++    similar |= depthToTexture;
++
+     // Copies are only supported on similar formats.
+     fastPath &= similar;
+ 
+@@ -1348,7 +1355,8 @@
+       if (unlikely(srcCopyExtent.width != srcExtent.width || srcCopyExtent.height != srcExtent.height))
+         return D3DERR_INVALIDCALL;
+ 
+-      if (unlikely(m_inScene))
++      // (into a depth texture also inside a scene: an EndScene there would flush mid-frame)
++      if (unlikely(m_inScene && !depthToTexture))
+         return D3DERR_INVALIDCALL;
+     }
+ 
+@@ -1410,11 +1418,15 @@
+         EmitCs([
+           cDstImage    = dstImage,
+           cSrcImage    = srcImage,
+-          cRegion      = region
++          cRegion      = region,
++          cDepthMode   = depthToTexture ? VK_RESOLVE_MODE_SAMPLE_ZERO_BIT : VK_RESOLVE_MODE_AVERAGE_BIT,
++          cStencilMode = depthToTexture ? VK_RESOLVE_MODE_NONE : VK_RESOLVE_MODE_SAMPLE_ZERO_BIT
+         ] (DxvkContext* ctx) {
+-          // Deliberately use AVERAGE even for depth resolves here
++          // Deliberately use AVERAGE even for depth resolves here (into a depth texture: one
++          // sample's depth, never a mix of a near and a far surface at an edge; its stencil is
++          // never read, so it is left out)
+           ctx->resolveImage(cDstImage, cSrcImage, cRegion, cSrcImage->info().format,
+-            VK_RESOLVE_MODE_AVERAGE_BIT, VK_RESOLVE_MODE_SAMPLE_ZERO_BIT);
++            cDepthMode, cStencilMode);
+         });
+       } else {
+         EmitCs([

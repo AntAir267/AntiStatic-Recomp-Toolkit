@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 182" role="img" aria-label="AntiStatic: an ant inside a static-warning triangle, crossed through">
+  <title>AntiStatic</title>
+  <!-- After the electrostatic-discharge warning symbol (a hand in a triangle, crossed through):
+       the hand is an ant. -->
+  <path d="M100 12 L190 170 L10 170 Z" fill="#f2c200" stroke="#111" stroke-width="9" stroke-linejoin="round"/>
+  <g fill="#111" stroke="#111" stroke-linecap="round">
+    <!-- antennae -->
+    <path d="M95 66 Q86 52 78 50" fill="none" stroke-width="4"/>
+    <path d="M105 66 Q114 52 122 50" fill="none" stroke-width="4"/>
+    <!-- legs: three pairs from the thorax -->
+    <path d="M94 92 L74 82 L64 70" fill="none" stroke-width="4"/>
+    <path d="M106 92 L126 82 L136 70" fill="none" stroke-width="4"/>
+    <path d="M93 100 L70 102 L58 98" fill="none" stroke-width="4"/>
+    <path d="M107 100 L130 102 L142 98" fill="none" stroke-width="4"/>
+    <path d="M94 107 L76 122 L70 140" fill="none" stroke-width="4"/>
+    <path d="M106 107 L124 122 L130 140" fill="none" stroke-width="4"/>
+    <!-- head, thorax, abdomen -->
+    <ellipse cx="100" cy="74" rx="10" ry="9" stroke="none"/>
+    <ellipse cx="100" cy="98" rx="8" ry="13" stroke="none"/>
+    <ellipse cx="100" cy="134" rx="15" ry="22" stroke="none"/>
+  </g>
+  <!-- the stroke through it -->
+  <path d="M64 103 L150 154" stroke="#f2c200" stroke-width="16" stroke-linecap="round"/>
+  <path d="M64 103 L150 154" stroke="#111" stroke-width="8" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,6545 @@
+{
+ "cases": {
+  "case_pc_adc": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "adc"
+  },
+  "case_pc_add": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add"
+  },
+  "case_pc_add_16bit_carry": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 65535,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.16bit-carry"
+  },
+  "case_pc_add_8bit_sign": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.8bit-sign"
+  },
+  "case_pc_add_aux_carry": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 15,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 1,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.aux-carry"
+  },
+  "case_pc_add_carry_out": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 4294967295,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.carry-out"
+  },
+  "case_pc_add_mem": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "11000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.mem"
+  },
+  "case_pc_add_mem8_carry": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "f800000000000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.mem8.carry"
+  },
+  "case_pc_add_overflow": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 2147483647,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 1,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.overflow"
+  },
+  "case_pc_add_paired_setb": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 4294967295,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.paired.setb"
+  },
+  "case_pc_add_paired_sete": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 1,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 4294967295,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.paired.sete"
+  },
+  "case_pc_add_paired_setl": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 2147483647,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 1,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "add.paired.setl"
+  },
+  "case_pc_and_clears_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "and.clears-cf"
+  },
+  "case_pc_bsf_0": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1088,
+   "mem": {},
+   "regs": {
+    "eax": 4660,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bsf.0"
+  },
+  "case_pc_bsf_80000001": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1088,
+   "mem": {},
+   "regs": {
+    "eax": 4660,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2147483649,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bsf.80000001"
+  },
+  "case_pc_bsf_f0": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1088,
+   "mem": {},
+   "regs": {
+    "eax": 4660,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 240,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bsf.f0"
+  },
+  "case_pc_bsr_0": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1088,
+   "mem": {},
+   "regs": {
+    "eax": 4660,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bsr.0"
+  },
+  "case_pc_bsr_80000001": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1088,
+   "mem": {},
+   "regs": {
+    "eax": 4660,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2147483649,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bsr.80000001"
+  },
+  "case_pc_bsr_f0": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1088,
+   "mem": {},
+   "regs": {
+    "eax": 4660,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 240,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bsr.f0"
+  },
+  "case_pc_bt_mem_bitstring_clear": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1025,
+   "mem": {
+    "0": "2000000000000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 69,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bt.mem-bitstring.clear"
+  },
+  "case_pc_bt_mem_bitstring_set": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1025,
+   "mem": {
+    "0": "0000000000000000200000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 69,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bt.mem-bitstring.set"
+  },
+  "case_pc_bt_setae_bit_clear": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1025,
+   "mem": {
+    "0": "0000000000000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 69,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bt.setae.bit-clear"
+  },
+  "case_pc_bt_setae_bit_set": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1025,
+   "mem": {
+    "0": "0000000000000000200000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 69,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bt.setae.bit-set"
+  },
+  "case_pc_btr_imm": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1025,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "btr.imm"
+  },
+  "case_pc_bts_mem_bitstring": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1025,
+   "mem": {
+    "0": "0000000000000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 69,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bts.mem-bitstring"
+  },
+  "case_pc_bts_reg": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1025,
+   "mem": {},
+   "regs": {
+    "eax": 69,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "bts.reg"
+  },
+  "case_pc_cf_survives_dec": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 16,
+    "edx": 1,
+    "esi": 268435456
+   },
+   "source": "cf.survives-dec"
+  },
+  "case_pc_cf_survives_inc": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 255,
+    "edi": 16,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cf.survives-inc"
+  },
+  "case_pc_clc_publishes_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 1,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "clc.publishes-cf"
+  },
+  "case_pc_cmc_publishes_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 1,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmc.publishes-cf"
+  },
+  "case_pc_cmovle_after_test_positive": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 286331153,
+    "ebp": 0,
+    "ebx": 44,
+    "ecx": 572662306,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmovle.after-test.positive"
+  },
+  "case_pc_cmp_8bit_signed": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 128,
+    "ebp": 0,
+    "ebx": 1,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmp.8bit-signed"
+  },
+  "case_pc_cmp_equal": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 7,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 7,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmp.equal"
+  },
+  "case_pc_cmp_mem8_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "8000000000000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmp.mem8.zero"
+  },
+  "case_pc_cmpsb_repe_equal": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "41424344",
+    "100": "41424344"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 4,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmpsb.repe-equal"
+  },
+  "case_pc_cmpsb_repe_greater_sbb": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "4142435a",
+    "100": "41424344"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 305419896,
+    "ecx": 4,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmpsb.repe-greater-sbb"
+  },
+  "case_pc_cmpsb_repe_less_sbb": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "41424341",
+    "100": "41424344"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 305419896,
+    "ecx": 4,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmpsb.repe-less-sbb"
+  },
+  "case_pc_cmpsd_repe_differs": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "4142434445464748",
+    "100": "414243447778797a"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmpsd.repe-differs"
+  },
+  "case_pc_cmpsd_repe_equal": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "4142434445464748",
+    "100": "4142434445464748"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmpsd.repe-equal"
+  },
+  "case_pc_cmpsd_single": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "41424344",
+    "100": "41424345"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmpsd.single"
+  },
+  "case_pc_cmpsw_repe_differs": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "414243444546",
+    "100": "414278784546"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "cmpsw.repe-differs"
+  },
+  "case_pc_dec_edx_to_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 1,
+    "esi": 268435456
+   },
+   "source": "dec.edx.to-zero"
+  },
+  "case_pc_dec_mem8_nonzero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0500000000000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "dec.mem8.nonzero"
+  },
+  "case_pc_dec_mem8_to_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0100000000000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "dec.mem8.to-zero"
+  },
+  "case_pc_dec_mem8_wraps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000000000000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "dec.mem8.wraps"
+  },
+  "case_pc_dec_paired_sete": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 1,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "dec.paired.sete"
+  },
+  "case_pc_dec_preserves_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "dec.preserves-cf"
+  },
+  "case_pc_div_r16": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1024,
+   "mem": {},
+   "regs": {
+    "eax": 2863267840,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 7,
+    "edi": 268435712,
+    "edx": 3149594625,
+    "esi": 268435456
+   },
+   "source": "div.r16"
+  },
+  "case_pc_div_r8": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1024,
+   "mem": {},
+   "regs": {
+    "eax": 2863268103,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 5,
+    "edi": 268435712,
+    "edx": 1432778632,
+    "esi": 268435456
+   },
+   "source": "div.r8"
+  },
+  "case_pc_fld_m80": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "35c26821a2da0fc9014000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fld.m80"
+  },
+  "case_pc_fpu_abs": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000000000001ec0"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.abs"
+  },
+  "case_pc_fpu_addp_dest": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f03f0000000000000840"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.addp-dest"
+  },
+  "case_pc_fpu_addp_pops_one": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.addp-pops-one"
+  },
+  "case_pc_fpu_chs": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000000000000840"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.chs"
+  },
+  "case_pc_fpu_divide": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f03f0000000000000840"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.divide"
+  },
+  "case_pc_fpu_double_rounding": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "da02e783b0652b43ec730140119b2443"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.double-rounding"
+  },
+  "case_pc_fpu_fcom_less": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000003f0000803f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fcom-less"
+  },
+  "case_pc_fpu_fcom_nan": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c07f0000803f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fcom-nan"
+  },
+  "case_pc_fpu_fcompp_keeps_eflags": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000003f0000803f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fcompp-keeps-eflags"
+  },
+  "case_pc_fpu_float_load": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "cdcccc3d"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.float-load"
+  },
+  "case_pc_fpu_fst_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "00002040"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fst-st1"
+  },
+  "case_pc_fpu_ftst_keeps_eflags": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000003f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.ftst-keeps-eflags"
+  },
+  "case_pc_fpu_fucom_keeps_eflags_join": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000003f0000803f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fucom-keeps-eflags-join"
+  },
+  "case_pc_fpu_fucom_keeps_eflags_nonzero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000803f0000803f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fucom-keeps-eflags-nonzero"
+  },
+  "case_pc_fpu_fucom_keeps_eflags_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000003f0000803f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fucom-keeps-eflags-zero"
+  },
+  "case_pc_fpu_fucompp_equal": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000803f0000803f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fucompp-equal"
+  },
+  "case_pc_fpu_fucompp_less": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000003f0000803f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fucompp-less"
+  },
+  "case_pc_fpu_fucompp_nan": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000c07f0000803f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.fucompp-nan"
+  },
+  "case_pc_fpu_int_roundtrip": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "c7cfffff"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.int-roundtrip"
+  },
+  "case_pc_fpu_load_store": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f03f"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.load-store"
+  },
+  "case_pc_fpu_lt_zero_parity_join_neg": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "000000bf00000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.lt-zero-parity-join-neg"
+  },
+  "case_pc_fpu_lt_zero_parity_join_pos": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000003f00000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.lt-zero-parity-join-pos"
+  },
+  "case_pc_fpu_lt_zero_parity_neg": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "000000bf00000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.lt-zero-parity-neg"
+  },
+  "case_pc_fpu_lt_zero_parity_pos": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000003f00000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.lt-zero-parity-pos"
+  },
+  "case_pc_fpu_mulp_dest_2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f03f00000000000000400000000000000840"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.mulp-dest-2"
+  },
+  "case_pc_fpu_multiply": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "00000000000008400000000000000840"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.multiply"
+  },
+  "case_pc_fpu_push": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.push"
+  },
+  "case_pc_fpu_push_pop": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.push-pop"
+  },
+  "case_pc_fpu_push_twice": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.push-twice"
+  },
+  "case_pc_fpu_sqrt": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000000000000040"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.sqrt"
+  },
+  "case_pc_fpu_store_pops": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.store-pops"
+  },
+  "case_pc_fpu_subrp_dest": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f03f0000000000000840"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.subrp-dest"
+  },
+  "case_pc_fpu_subtract": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f03f0000000000000840"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.subtract"
+  },
+  "case_pc_fpu_xch_1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f03f0000000000000840"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.xch-1"
+  },
+  "case_pc_fpu_xch_2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f03f00000000000000400000000000000840"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.xch-2"
+  },
+  "case_pc_fpu_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fpu.zero"
+  },
+  "case_pc_frndint_chop": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "9a99d9bf000000007f0e00000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "frndint.chop"
+  },
+  "case_pc_frndint_down": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "9a9999be000000007f0600000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "frndint.down"
+  },
+  "case_pc_frndint_nearest": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "00002040000000007f0200000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "frndint.nearest"
+  },
+  "case_pc_frndint_up": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "9a99993e000000007f0a00000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "frndint.up"
+  },
+  "case_pc_fsin_c2": {
+   "emulator_gap": "Unicorn leaves C1 clear after fsin; a real x87 sets it when the result was rounded up (Intel SDM, FSIN: C1 \"set if result was rounded up\")",
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000e03f000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fsin.c2"
+  },
+  "case_pc_fsincos": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "c776082d358ce33f000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fsincos"
+  },
+  "case_pc_fstp_m80": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "adfa5c6d454a93c0000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "fstp.m80"
+  },
+  "case_pc_idiv_r16": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1024,
+   "mem": {},
+   "regs": {
+    "eax": 2863267840,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 65529,
+    "edi": 268435712,
+    "edx": 3149660159,
+    "esi": 268435456
+   },
+   "source": "idiv.r16"
+  },
+  "case_pc_idiv_r8": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1024,
+   "mem": {},
+   "regs": {
+    "eax": 2863333113,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 5,
+    "edi": 268435712,
+    "edx": 1432778632,
+    "esi": 268435456
+   },
+   "source": "idiv.r8"
+  },
+  "case_pc_imul_r16": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3073,
+   "mem": {},
+   "regs": {
+    "eax": 305459200,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 256,
+    "edi": 268435712,
+    "edx": 1432778632,
+    "esi": 268435456
+   },
+   "source": "imul.r16"
+  },
+  "case_pc_imul_r8": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3073,
+   "mem": {},
+   "regs": {
+    "eax": 305420016,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 1432778632,
+    "esi": 268435456
+   },
+   "source": "imul.r8"
+  },
+  "case_pc_inc_cl_wraps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305420031,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "inc.cl.wraps"
+  },
+  "case_pc_inc_mem8_to_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "ff00000000000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "inc.mem8.to-zero"
+  },
+  "case_pc_inc_paired_sete_false": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 1,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "inc.paired.sete-false"
+  },
+  "case_pc_inc_paired_sete_true": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 4294967295,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "inc.paired.sete-true"
+  },
+  "case_pc_inc_preserves_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "inc.preserves-cf"
+  },
+  "case_pc_lock_cmpxchg8b_differ": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0500000007000000"
+   },
+   "regs": {
+    "eax": 5,
+    "ebp": 0,
+    "ebx": 17,
+    "ecx": 34,
+    "edi": 268435712,
+    "edx": 8,
+    "esi": 268435456
+   },
+   "source": "lock.cmpxchg8b.differ"
+  },
+  "case_pc_lock_cmpxchg8b_equal": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0500000007000000"
+   },
+   "regs": {
+    "eax": 5,
+    "ebp": 0,
+    "ebx": 17,
+    "ecx": 34,
+    "edi": 268435712,
+    "edx": 7,
+    "esi": 268435456
+   },
+   "source": "lock.cmpxchg8b.equal"
+  },
+  "case_pc_lock_cmpxchg_differ": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "05000000"
+   },
+   "regs": {
+    "eax": 4,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 9,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "lock.cmpxchg.differ"
+  },
+  "case_pc_lock_cmpxchg_equal": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "05000000"
+   },
+   "regs": {
+    "eax": 5,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 9,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "lock.cmpxchg.equal"
+  },
+  "case_pc_lock_inc": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "29000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "lock.inc"
+  },
+  "case_pc_lock_xadd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "01000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 4294967295,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "lock.xadd"
+  },
+  "case_pc_movsb_rep_backward": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "41424344"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 4,
+    "edi": 268435715,
+    "edx": 0,
+    "esi": 268435459
+   },
+   "source": "movsb.rep-backward"
+  },
+  "case_pc_movsb_rep_forward": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "41424344"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 4,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "movsb.rep-forward"
+  },
+  "case_pc_movsb_rep_forward_overlap": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "586162636465666768"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 7,
+    "edi": 268435457,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "movsb.rep-forward-overlap"
+  },
+  "case_pc_movsd_rep_backward": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "4142434445464748"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435716,
+    "edx": 0,
+    "esi": 268435460
+   },
+   "source": "movsd.rep-backward"
+  },
+  "case_pc_movsd_rep_backward_overlap": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "4142434445464748494a4b4c4d4e4f50"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435464,
+    "edx": 0,
+    "esi": 268435468
+   },
+   "source": "movsd.rep-backward-overlap"
+  },
+  "case_pc_movsd_rep_forward_overlap": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "4142434445464748494a4b4c6d6e6f707172737475767778797a30313233343536373839"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 6,
+    "edi": 268435468,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "movsd.rep-forward-overlap"
+  },
+  "case_pc_mul_r16": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3073,
+   "mem": {},
+   "regs": {
+    "eax": 305459200,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 256,
+    "edi": 268435712,
+    "edx": 1432778632,
+    "esi": 268435456
+   },
+   "source": "mul.r16"
+  },
+  "case_pc_mul_r8": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3073,
+   "mem": {},
+   "regs": {
+    "eax": 305420016,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 1432778632,
+    "esi": 268435456
+   },
+   "source": "mul.r8"
+  },
+  "case_pc_neg": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 5,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "neg"
+  },
+  "case_pc_neg_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "neg.zero"
+  },
+  "case_pc_or": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "or"
+  },
+  "case_pc_pop16_keeps_high_half": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 48879,
+    "ebp": 0,
+    "ebx": 3735879680,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "pop16.keeps-high-half"
+  },
+  "case_pc_popfd_restores_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "popfd.restores-cf"
+  },
+  "case_pc_popfd_restores_df": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1024,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "popfd.restores-df"
+  },
+  "case_pc_push16_esp_by_two": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 305419896,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "push16.esp-by-two"
+  },
+  "case_pc_push16_then_pop32": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 2293064,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "push16.then.pop32"
+  },
+  "case_pc_push_pop": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "push.pop"
+  },
+  "case_pc_pushfd_after_add": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 15,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 1,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "pushfd.after-add"
+  },
+  "case_pc_pushfd_after_cmp": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 1,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "pushfd.after-cmp"
+  },
+  "case_pc_rcl_8bit": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2863311489,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "rcl.8bit"
+  },
+  "case_pc_rcr_16bit": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2863267843,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "rcr.16bit"
+  },
+  "case_pc_rcr_32bit": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "rcr.32bit"
+  },
+  "case_pc_rcr_8bit_carry_in": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2863311370,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "rcr.8bit.carry-in"
+  },
+  "case_pc_rcr_8bit_carry_out": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2863311371,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "rcr.8bit.carry-out"
+  },
+  "case_pc_rcr_publishes_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 5,
+    "edi": 268435712,
+    "edx": 1,
+    "esi": 268435456
+   },
+   "source": "rcr.publishes-cf"
+  },
+  "case_pc_repe_cmpsb_ecx0_keeps_flags": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 5,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "repe-cmpsb.ecx0-keeps-flags"
+  },
+  "case_pc_repne_scasb_ecx0_keeps_flags": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 5,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "repne-scasb.ecx0-keeps-flags"
+  },
+  "case_pc_rol_16bit": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2863300609,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "rol.16bit"
+  },
+  "case_pc_rol_8bit": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2863311489,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "rol.8bit"
+  },
+  "case_pc_ror_8bit": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2863311489,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "ror.8bit"
+  },
+  "case_pc_sahf_cf_zf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sahf.cf-zf"
+  },
+  "case_pc_sahf_clear": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sahf.clear"
+  },
+  "case_pc_sahf_pf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sahf.pf"
+  },
+  "case_pc_sar": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 2147483648,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sar"
+  },
+  "case_pc_sar_count_masked": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 2147483648,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sar.count-masked"
+  },
+  "case_pc_sbb_idiom": {
+   "emulator_gap": null,
+   "known": "cmp does not publish CF, so sbb reads the running _cf. Making it precise deterministically broke Fury3; see the note on sbb in lift32.py.",
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 1,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sbb.idiom"
+  },
+  "case_pc_scasb_repne_found": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "100": "78794142"
+   },
+   "regs": {
+    "eax": 65,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 4,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "scasb.repne-found"
+  },
+  "case_pc_scasd_repne_found": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "100": "7a7a7a7a4142434477777777"
+   },
+   "regs": {
+    "eax": 1145258561,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "scasd.repne-found"
+  },
+  "case_pc_seekpacket_tail_fail": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "seekpacket.tail.fail"
+  },
+  "case_pc_seekpacket_tail_ok": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 44,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "seekpacket.tail.ok"
+  },
+  "case_pc_setg_after_or_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setg.after-or.zero"
+  },
+  "case_pc_setg_after_test_positive": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 44,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setg.after-test.positive"
+  },
+  "case_pc_setge_after_test_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setge.after-test.zero"
+  },
+  "case_pc_setge_after_xor_signs_differ": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 3212836864,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 1065353216,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setge.after-xor.signs-differ"
+  },
+  "case_pc_setge_after_xor_signs_same": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 3212836864,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3221225472,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setge.after-xor.signs-same"
+  },
+  "case_pc_setl_after_or_negative": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 2147483648,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 1,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setl.after-or.negative"
+  },
+  "case_pc_setl_after_test_negative": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 4294967280,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setl.after-test.negative"
+  },
+  "case_pc_setle_after_and_positive": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 255,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 44,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setle.after-and.positive"
+  },
+  "case_pc_setle_after_test_negative": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 4294967280,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setle.after-test.negative"
+  },
+  "case_pc_setle_after_test_positive": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 44,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setle.after-test.positive"
+  },
+  "case_pc_setle_after_test_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "setle.after-test.zero"
+  },
+  "case_pc_shift_by_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "shift.by-zero"
+  },
+  "case_pc_shl": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "shl"
+  },
+  "case_pc_shl_carry_out": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 268435456,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "shl.carry-out"
+  },
+  "case_pc_shl_count_masked": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 65535,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "shl.count-masked"
+  },
+  "case_pc_shl_count_masks_to_zero": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 305419896,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "shl.count-masks-to-zero"
+  },
+  "case_pc_shl_publishes_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 2147483648,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 0,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "shl.publishes-cf"
+  },
+  "case_pc_shr_1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {},
+   "regs": {
+    "eax": 17,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "shr.1"
+  },
+  "case_pc_shr_count_masked": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 3735928559,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "shr.count-masked"
+  },
+  "case_pc_shr_publishes_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 0,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 7,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "shr.publishes-cf"
+  },
+  "case_pc_span_carry": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "100": "07000000e8030000"
+   },
+   "regs": {
+    "eax": 2147483648,
+    "ebp": 536870912,
+    "ebx": 4026531840,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 2415919104,
+    "esi": 256
+   },
+   "source": "span.carry"
+  },
+  "case_pc_span_carry_default": {
+   "emulator_gap": null,
+   "known": "adc/sbb read the _cf variable, which add/sub/cmp do not write; Lifter(precise_carry=True) derives it (off by default: Fury3)",
+   "mask": 3269,
+   "mem": {
+    "100": "07000000e8030000"
+   },
+   "regs": {
+    "eax": 2147483648,
+    "ebp": 536870912,
+    "ebx": 4026531840,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 2415919104,
+    "esi": 256
+   },
+   "source": "span.carry.default"
+  },
+  "case_pc_span_nocarry": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "100": "07000000e8030000"
+   },
+   "regs": {
+    "eax": 268435456,
+    "ebp": 536870912,
+    "ebx": 268435456,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 536870912,
+    "esi": 256
+   },
+   "source": "span.nocarry"
+  },
+  "case_pc_sse_addps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.addps"
+  },
+  "case_pc_sse_addsd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.addsd"
+  },
+  "case_pc_sse_addss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.addss"
+  },
+  "case_pc_sse_addss_mem": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.addss.mem"
+  },
+  "case_pc_sse_andnps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.andnps"
+  },
+  "case_pc_sse_andps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.andps"
+  },
+  "case_pc_sse_cmpeqss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cmpeqss"
+  },
+  "case_pc_sse_cmpleps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cmpleps"
+  },
+  "case_pc_sse_cmpltps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cmpltps"
+  },
+  "case_pc_sse_cmpnltps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cmpnltps"
+  },
+  "case_pc_sse_cmpunordps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cmpunordps"
+  },
+  "case_pc_sse_comisd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.comisd"
+  },
+  "case_pc_sse_comiss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.comiss"
+  },
+  "case_pc_sse_comiss_mem": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.comiss.mem"
+  },
+  "case_pc_sse_cvtdq2pd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtdq2pd"
+  },
+  "case_pc_sse_cvtdq2pd_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtdq2pd.int"
+  },
+  "case_pc_sse_cvtdq2ps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtdq2ps"
+  },
+  "case_pc_sse_cvtdq2ps_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtdq2ps.int"
+  },
+  "case_pc_sse_cvtpi2ps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtpi2ps"
+  },
+  "case_pc_sse_cvtps2dq": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtps2dq"
+  },
+  "case_pc_sse_cvtps2pi": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtps2pi"
+  },
+  "case_pc_sse_cvtsd2ss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtsd2ss"
+  },
+  "case_pc_sse_cvtsi2ss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtsi2ss"
+  },
+  "case_pc_sse_cvtsi2ss_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtsi2ss.int"
+  },
+  "case_pc_sse_cvtss2sd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtss2sd"
+  },
+  "case_pc_sse_cvtss2si": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtss2si"
+  },
+  "case_pc_sse_cvtss2si_down": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvtss2si.down"
+  },
+  "case_pc_sse_cvttps2dq": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvttps2dq"
+  },
+  "case_pc_sse_cvttps2pi": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvttps2pi"
+  },
+  "case_pc_sse_cvttsd2si": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvttsd2si"
+  },
+  "case_pc_sse_cvttss2si": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.cvttss2si"
+  },
+  "case_pc_sse_divps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.divps"
+  },
+  "case_pc_sse_divsd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.divsd"
+  },
+  "case_pc_sse_divss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.divss"
+  },
+  "case_pc_sse_maxps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.maxps"
+  },
+  "case_pc_sse_maxsd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.maxsd"
+  },
+  "case_pc_sse_maxss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.maxss"
+  },
+  "case_pc_sse_minps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.minps"
+  },
+  "case_pc_sse_minsd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.minsd"
+  },
+  "case_pc_sse_minss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.minss"
+  },
+  "case_pc_sse_movaps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movaps"
+  },
+  "case_pc_sse_movd_in": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movd.in"
+  },
+  "case_pc_sse_movd_in_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movd.in.int"
+  },
+  "case_pc_sse_movd_out": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movd.out"
+  },
+  "case_pc_sse_movhlps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movhlps"
+  },
+  "case_pc_sse_movhps_load": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movhps.load"
+  },
+  "case_pc_sse_movhps_store": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movhps.store"
+  },
+  "case_pc_sse_movlhps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movlhps"
+  },
+  "case_pc_sse_movlps_load": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movlps.load"
+  },
+  "case_pc_sse_movlps_store": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movlps.store"
+  },
+  "case_pc_sse_movmskps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movmskps"
+  },
+  "case_pc_sse_movq_reg": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movq.reg"
+  },
+  "case_pc_sse_movq_store": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movq.store"
+  },
+  "case_pc_sse_movsd_load": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movsd.load"
+  },
+  "case_pc_sse_movsd_reg": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movsd.reg"
+  },
+  "case_pc_sse_movss_load": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movss.load"
+  },
+  "case_pc_sse_movss_reg": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movss.reg"
+  },
+  "case_pc_sse_movss_store": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.movss.store"
+  },
+  "case_pc_sse_mulps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.mulps"
+  },
+  "case_pc_sse_mulsd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.mulsd"
+  },
+  "case_pc_sse_mulss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.mulss"
+  },
+  "case_pc_sse_mulss_mem": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.mulss.mem"
+  },
+  "case_pc_sse_orps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.orps"
+  },
+  "case_pc_sse_paddd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.paddd"
+  },
+  "case_pc_sse_paddd_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.paddd.int"
+  },
+  "case_pc_sse_pcmpeqb": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpeqb"
+  },
+  "case_pc_sse_pcmpeqb_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpeqb.int"
+  },
+  "case_pc_sse_pcmpeqd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpeqd"
+  },
+  "case_pc_sse_pcmpeqd_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpeqd.int"
+  },
+  "case_pc_sse_pcmpeqw": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpeqw"
+  },
+  "case_pc_sse_pcmpeqw_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpeqw.int"
+  },
+  "case_pc_sse_pcmpgtb": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpgtb"
+  },
+  "case_pc_sse_pcmpgtb_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpgtb.int"
+  },
+  "case_pc_sse_pcmpgtd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpgtd"
+  },
+  "case_pc_sse_pcmpgtd_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpgtd.int"
+  },
+  "case_pc_sse_pcmpgtw": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpgtw"
+  },
+  "case_pc_sse_pcmpgtw_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pcmpgtw.int"
+  },
+  "case_pc_sse_pextrw": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pextrw"
+  },
+  "case_pc_sse_pextrw_6": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pextrw.6"
+  },
+  "case_pc_sse_pextrw_6_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pextrw.6.int"
+  },
+  "case_pc_sse_pextrw_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pextrw.int"
+  },
+  "case_pc_sse_pinsrw": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pinsrw"
+  },
+  "case_pc_sse_pinsrw_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pinsrw.int"
+  },
+  "case_pc_sse_pinsrw_mem": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pinsrw.mem"
+  },
+  "case_pc_sse_pinsrw_mem_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pinsrw.mem.int"
+  },
+  "case_pc_sse_pmaxsw": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pmaxsw"
+  },
+  "case_pc_sse_pmaxsw_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pmaxsw.int"
+  },
+  "case_pc_sse_pminsw": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pminsw"
+  },
+  "case_pc_sse_pminsw_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pminsw.int"
+  },
+  "case_pc_sse_pmovmskb": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pmovmskb"
+  },
+  "case_pc_sse_pmovmskb_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pmovmskb.int"
+  },
+  "case_pc_sse_pshufd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pshufd"
+  },
+  "case_pc_sse_pshufd_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pshufd.int"
+  },
+  "case_pc_sse_pslld_imm": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pslld.imm"
+  },
+  "case_pc_sse_pslld_imm_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pslld.imm.int"
+  },
+  "case_pc_sse_pslldq": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pslldq"
+  },
+  "case_pc_sse_pslldq_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pslldq.int"
+  },
+  "case_pc_sse_psllq_imm": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psllq.imm"
+  },
+  "case_pc_sse_psllq_imm_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psllq.imm.int"
+  },
+  "case_pc_sse_psllw_imm": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psllw.imm"
+  },
+  "case_pc_sse_psllw_imm_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psllw.imm.int"
+  },
+  "case_pc_sse_psrad_imm": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrad.imm"
+  },
+  "case_pc_sse_psrad_imm_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrad.imm.int"
+  },
+  "case_pc_sse_psrad_sat": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrad.sat"
+  },
+  "case_pc_sse_psrad_sat_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrad.sat.int"
+  },
+  "case_pc_sse_psraw_imm": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psraw.imm"
+  },
+  "case_pc_sse_psraw_imm_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psraw.imm.int"
+  },
+  "case_pc_sse_psrld_imm": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrld.imm"
+  },
+  "case_pc_sse_psrld_imm_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrld.imm.int"
+  },
+  "case_pc_sse_psrldq": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrldq"
+  },
+  "case_pc_sse_psrldq_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrldq.int"
+  },
+  "case_pc_sse_psrlq_imm": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrlq.imm"
+  },
+  "case_pc_sse_psrlq_imm_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrlq.imm.int"
+  },
+  "case_pc_sse_psrlq_mem": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrlq.mem"
+  },
+  "case_pc_sse_psrlq_mem_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrlq.mem.int"
+  },
+  "case_pc_sse_psrlq_xmm": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrlq.xmm"
+  },
+  "case_pc_sse_psrlq_xmm_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrlq.xmm.int"
+  },
+  "case_pc_sse_psrlw_sat": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrlw.sat"
+  },
+  "case_pc_sse_psrlw_sat_int": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "07000000f7ffffffffffff7f0000008064000000ffffffff0000000000000100000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 305419896,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.psrlw.sat.int"
+  },
+  "case_pc_sse_punpckhqdq": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.punpckhqdq"
+  },
+  "case_pc_sse_punpcklqdq": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.punpcklqdq"
+  },
+  "case_pc_sse_pxor": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.pxor"
+  },
+  "case_pc_sse_shufps_1b": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.shufps.1b"
+  },
+  "case_pc_sse_shufps_4e": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.shufps.4e"
+  },
+  "case_pc_sse_sqrtps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.sqrtps"
+  },
+  "case_pc_sse_sqrtss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.sqrtss"
+  },
+  "case_pc_sse_stmxcsr": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.stmxcsr"
+  },
+  "case_pc_sse_subps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.subps"
+  },
+  "case_pc_sse_subsd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.subsd"
+  },
+  "case_pc_sse_subss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.subss"
+  },
+  "case_pc_sse_ucomisd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.ucomisd"
+  },
+  "case_pc_sse_ucomiss": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.ucomiss"
+  },
+  "case_pc_sse_ucomiss_lahf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3269,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.ucomiss.lahf"
+  },
+  "case_pc_sse_unpckhps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.unpckhps"
+  },
+  "case_pc_sse_unpcklpd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.unpcklpd"
+  },
+  "case_pc_sse_unpcklps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.unpcklps"
+  },
+  "case_pc_sse_xorpd": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "000000000000f83f000000000000f87f000000000000d03f00000000000008c0000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.xorpd"
+  },
+  "case_pc_sse_xorps": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000c03f000010c07684df500000c07f0000003f000010c0000000800000f840000020400000e0bf803f000000000000"
+   },
+   "regs": {
+    "eax": 4294967173,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sse.xorps"
+  },
+  "case_pc_stc_keeps_zf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 7,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 7,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "stc.keeps-zf"
+  },
+  "case_pc_stc_publishes_cf": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1221,
+   "mem": {},
+   "regs": {
+    "eax": 2,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 1,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "stc.publishes-cf"
+  },
+  "case_pc_store": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 2864434397,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "store"
+  },
+  "case_pc_stosb_rep_backward": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 90,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 4,
+    "edi": 268435715,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "stosb.rep-backward"
+  },
+  "case_pc_stosd_rep_backward": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 287454020,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435716,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "stosd.rep-backward"
+  },
+  "case_pc_sub": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sub"
+  },
+  "case_pc_sub_aux_borrow": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 1,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sub.aux-borrow"
+  },
+  "case_pc_sub_borrow": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 1,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sub.borrow"
+  },
+  "case_pc_sub_paired_setl": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 1,
+    "ebp": 0,
+    "ebx": 0,
+    "ecx": 2,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "sub.paired.setl"
+  },
+  "case_pc_test": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "test"
+  },
+  "case_pc_x87_dc_e0_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.dc.e0.st1"
+  },
+  "case_pc_x87_dc_e0_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.dc.e0.st2"
+  },
+  "case_pc_x87_dc_e8_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.dc.e8.st1"
+  },
+  "case_pc_x87_dc_e8_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.dc.e8.st2"
+  },
+  "case_pc_x87_dc_f0_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.dc.f0.st1"
+  },
+  "case_pc_x87_dc_f0_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.dc.f0.st2"
+  },
+  "case_pc_x87_dc_f8_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.dc.f8.st1"
+  },
+  "case_pc_x87_dc_f8_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.dc.f8.st2"
+  },
+  "case_pc_x87_de_e0_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.de.e0.st1"
+  },
+  "case_pc_x87_de_e0_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.de.e0.st2"
+  },
+  "case_pc_x87_de_e8_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.de.e8.st1"
+  },
+  "case_pc_x87_de_e8_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.de.e8.st2"
+  },
+  "case_pc_x87_de_f0_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.de.f0.st1"
+  },
+  "case_pc_x87_de_f0_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.de.f0.st2"
+  },
+  "case_pc_x87_de_f8_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.de.f8.st1"
+  },
+  "case_pc_x87_de_f8_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.de.f8.st2"
+  },
+  "case_pc_x87_fadd_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fadd.st1"
+  },
+  "case_pc_x87_fadd_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fadd.st2"
+  },
+  "case_pc_x87_fadd_to_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fadd.to.st1"
+  },
+  "case_pc_x87_fadd_to_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fadd.to.st2"
+  },
+  "case_pc_x87_faddp_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.faddp.st1"
+  },
+  "case_pc_x87_faddp_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.faddp.st2"
+  },
+  "case_pc_x87_fcom_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fcom.st1"
+  },
+  "case_pc_x87_fcom_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fcom.st2"
+  },
+  "case_pc_x87_fcomi_equal": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000004000000040000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fcomi.equal"
+  },
+  "case_pc_x87_fcomi_less": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000803f0000003f000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fcomi.less"
+  },
+  "case_pc_x87_fcomi_nan": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000803f0000c07f000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fcomi.nan"
+  },
+  "case_pc_x87_fcomip_equal": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000004000000040000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fcomip.equal"
+  },
+  "case_pc_x87_fcomip_less": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000803f0000003f000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fcomip.less"
+  },
+  "case_pc_x87_fcomip_nan": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000803f0000c07f000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fcomip.nan"
+  },
+  "case_pc_x87_fdiv_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fdiv.st1"
+  },
+  "case_pc_x87_fdiv_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fdiv.st2"
+  },
+  "case_pc_x87_fdivr_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fdivr.st1"
+  },
+  "case_pc_x87_fdivr_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fdivr.st2"
+  },
+  "case_pc_x87_fld_st_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fld.st.st1"
+  },
+  "case_pc_x87_fld_st_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fld.st.st2"
+  },
+  "case_pc_x87_fmul_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fmul.st1"
+  },
+  "case_pc_x87_fmul_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fmul.st2"
+  },
+  "case_pc_x87_fmul_to_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fmul.to.st1"
+  },
+  "case_pc_x87_fmul_to_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fmul.to.st2"
+  },
+  "case_pc_x87_fmulp_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fmulp.st1"
+  },
+  "case_pc_x87_fmulp_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fmulp.st2"
+  },
+  "case_pc_x87_fstp_st_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fstp.st.st1"
+  },
+  "case_pc_x87_fstp_st_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fstp.st.st2"
+  },
+  "case_pc_x87_fsub_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fsub.st1"
+  },
+  "case_pc_x87_fsub_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fsub.st2"
+  },
+  "case_pc_x87_fsubr_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fsubr.st1"
+  },
+  "case_pc_x87_fsubr_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fsubr.st2"
+  },
+  "case_pc_x87_fucomip_equal": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000004000000040000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fucomip.equal"
+  },
+  "case_pc_x87_fucomip_less": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000803f0000003f000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fucomip.less"
+  },
+  "case_pc_x87_fucomip_nan": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "0000803f0000c07f000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fucomip.nan"
+  },
+  "case_pc_x87_fxch_st1": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fxch.st1"
+  },
+  "case_pc_x87_fxch_st2": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 1237,
+   "mem": {
+    "0": "000000000000004000000000000008400000000000001440"
+   },
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "x87.fxch.st2"
+  },
+  "case_pc_xadd_byte": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 127,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 1,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "xadd.byte"
+  },
+  "case_pc_xlatb": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {
+    "0": "1020307700000000000000000000000000000000000000000000000000000000"
+   },
+   "regs": {
+    "eax": 305419779,
+    "ebp": 0,
+    "ebx": 268435456,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "xlatb"
+  },
+  "case_pc_xor_self": {
+   "emulator_gap": null,
+   "known": null,
+   "mask": 3285,
+   "mem": {},
+   "regs": {
+    "eax": 16,
+    "ebp": 0,
+    "ebx": 128,
+    "ecx": 3,
+    "edi": 268435712,
+    "edx": 0,
+    "esi": 268435456
+   },
+   "source": "xor.self"
+  }
+ },
+ "commit": "2adc02f",
+ "skipped": {}
+}

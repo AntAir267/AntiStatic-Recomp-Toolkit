@@ -1,0 +1,3 @@
+#!/bin/bash
+# zig's C compiler for 64-bit Windows (MinGW ABI): the Windows build's compiler (DESIGN.md)
+exec "${ZIG:-zig}" cc -target x86_64-windows-gnu "$@"

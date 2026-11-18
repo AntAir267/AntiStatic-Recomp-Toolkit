@@ -1,0 +1,59 @@
+diff --git a/src/dxvk/dxvk_shader_cache.cpp b/src/dxvk/dxvk_shader_cache.cpp
+--- a/src/dxvk/dxvk_shader_cache.cpp
++++ b/src/dxvk/dxvk_shader_cache.cpp
+@@ -5,6 +5,10 @@
+ 
+ #include "../util/util_time.h"
+ 
++/* The cache holds converted shaders, so a change to the converter must not reuse entries made
++ * before it under the same version string (third_party/dxvk-texbem.patch: texbem's matrix). */
++#define DXVK_SHADER_CACHE_VERSION DXVK_VERSION "+texbem"
++
+ namespace dxvk {
+ 
+   DxvkShaderCache::Instance DxvkShaderCache::s_instance;
+@@ -186,7 +190,7 @@
+ 
+     LutHeader header = { };
+     header.magic = { 'D', 'X', 'V', 'K' };
+-    header.versionString = DXVK_VERSION;
++    header.versionString = DXVK_SHADER_CACHE_VERSION;
+ 
+     if (!writeHeader(m_lutFile, header)) {
+       Logger::warn(str::format("Failed to write cache header: ", path + m_filePaths.lutFile));
+@@ -209,9 +213,9 @@
+       return false;
+     }
+ 
+-    if (header.versionString != DXVK_VERSION) {
++    if (header.versionString != DXVK_SHADER_CACHE_VERSION) {
+       Logger::warn(str::format("Cache was created with DXVK version ", header.versionString,
+-        ", but current version is ", DXVK_VERSION, ". Discarding old cache."));
++        ", but current version is ", DXVK_SHADER_CACHE_VERSION, ". Discarding old cache."));
+       return false;
+     }
+ 
+diff --git a/subprojects/dxbc-spirv/sm3/sm3_converter.cpp b/subprojects/dxbc-spirv/sm3/sm3_converter.cpp
+--- a/subprojects/dxbc-spirv/sm3/sm3_converter.cpp
++++ b/subprojects/dxbc-spirv/sm3/sm3_converter.cpp
+@@ -449,13 +449,18 @@
+ 
+   std::array<ir::SsaDef, 2> components = {};
+ 
++  /* The device stores the matrix flipped (D3D9SharedPS: BumpEnvMat[0] = { MAT00, MAT10 },
++   * BumpEnvMat[1] = { MAT01, MAT11 }, as the fixed-function shader's dot products want it),
++   * so component i of the result takes row i: BumpEnvMat[i].x * src1.x + BumpEnvMat[i].y * src1.y. */
+   for (uint32_t i = 0u; i < components.size(); i++) {
++    auto bumpEnvRow = i ? bumpEnvMat1 : bumpEnvMat0;
++
+     auto src1r = ir::extractFromVector(builder, src1, 0u);
+-    auto bumpEnv0 = ir::extractFromVector(builder, bumpEnvMat0, i);
++    auto bumpEnv0 = ir::extractFromVector(builder, bumpEnvRow, 0u);
+     auto bumped0 = builder.add(emitFMul(scalarType, bumpEnv0, src1r));
+ 
+     auto src1g = ir::extractFromVector(builder, src1, 1u);
+-    auto bumpEnv1 = ir::extractFromVector(builder, bumpEnvMat1, i);
++    auto bumpEnv1 = ir::extractFromVector(builder, bumpEnvRow, 1u);
+     auto bumped1 = builder.add(emitFMul(scalarType, bumpEnv1, src1g));
+ 
+     auto bumpedSum = ir::extractFromVector(builder, src0, i);
