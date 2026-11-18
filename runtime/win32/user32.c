@@ -1062,7 +1062,13 @@ void win_post(uint32_t hwnd, uint32_t msg, uint32_t wp, uint32_t lp) { queue_put
 /* input from the host window (win.c): to the window with the focus */
 /* The mouse cursor: where the program last put it, or where host_mouse_at moved it (a controller's
    pointer, scripted input), in the game's own pixels. */
-static int32_t cursor_x = 320, cursor_y = 240;
+#ifndef PORT_CURSOR_START_X
+#define PORT_CURSOR_START_X 320
+#endif
+#ifndef PORT_CURSOR_START_Y
+#define PORT_CURSOR_START_Y 240
+#endif
+static int32_t cursor_x = PORT_CURSOR_START_X, cursor_y = PORT_CURSOR_START_Y;
 void post_message(uint32_t msg, uint32_t wparam, uint32_t lparam);
 
 /* the mouse at a point of the game's screen: the cursor position and WM_MOUSEMOVE */

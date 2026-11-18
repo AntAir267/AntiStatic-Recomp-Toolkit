@@ -108,6 +108,17 @@ def is_weird(i):
     return False
 
 
+_ADDR16 = frozenset(('bx', 'bp', 'si', 'di'))
+
+
+def _never_compiled(i):
+    """An instruction no 32-bit compiler emits, which the translator can't do either: `enter` with a
+    nesting level, or a 16-bit address. In a code pointer found in data, its body is data."""
+    if i.mn == 'enter':
+        return len(i.ops) > 1 and i.ops[1][0] == 'i' and i.ops[1][1] != 0
+    return any(op[0] == 'm' and (op[3] in _ADDR16 or op[4] in _ADDR16) for op in i.ops)
+
+
 class Func:
     def __init__(self, entry):
         self.entry = entry
@@ -375,8 +386,9 @@ class Discovery:
                     f.import_tails[a] = op[6]
                 else:
                     jt = self.jump_table(f, i, body_ends) if op[0] == 'm' else None
-                    if jt and all(t in known and t != entry for t in jt[2]):
-                        # a table of functions (also called through elsewhere): a tail call
+                    if jt and jt[3] != 'config' and all(t in known and t != entry for t in jt[2]):
+                        # a table of functions (also called through elsewhere): a tail call. A table
+                        # the build lists in JUMP_TABLES stays a bounded switch of tail calls.
                         f.indirect_jumps.add(a)
                         jt = None
                     elif jt:
@@ -458,6 +470,8 @@ class Discovery:
             return False
         if data_at(self.pe, self.dec, f.entry):
             return False                    # (a relocated word or a string is data, relocated or not)
+        if any(_never_compiled(i) for i in f.insns.values()):
+            return False                    # (data that decodes: L.A. Rush's MFC71 0x7c171c20, 0x7c173a2c)
         if f.entry in getattr(self.pe, 'reloc_pointers', ()):
             return True                     # a relocated address: the DLL's own pointer to it
         return self.looks_like_start(f.entry)

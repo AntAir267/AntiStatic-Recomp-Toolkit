@@ -3,6 +3,24 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.42 (2026-11-18)
+
+From L.A. Rush's move (its gaps 14-18):
+- **A table listed in `JUMP_TABLES` stays a bounded switch** even when every entry is a known
+  function (its cases become tail calls). Before, any table of functions became an indirect tail
+  call, listed or not, so listing one changed nothing. L.A. Rush's seven `cmp al,N; jbe; movzx
+  edx,al; jmp [edx*4+T]` tables are switches again.
+- **Discovery refuses a code pointer found in data whose body holds an instruction no 32-bit
+  compiler emits** (`enter` with a nesting level, a 16-bit address): it is data that decodes.
+  L.A. Rush's MFC71 loses 3 such functions (0x7c171c20, 0x7c173a2c, 0x7c173a40) and their 3
+  warnings, and gains 0x7c173ade, a catch handler's continuation one of them had swallowed.
+- `PORT_CMDLINE_EXE_W`: GetCommandLineW's program name when it differs from GetCommandLineA's.
+- `PORT_CURSOR_START_X` / `_Y`: where GetCursorPos starts (320, 240 unless set).
+- The v0.2.19 entry now says a port moving past it must compile runtime/rewrite/audit.c.
+- **Regenerate** if your build lists a table of functions in `JUMP_TABLES` (L.A. Rush) or finds
+  code pointers in data (`CODE_SECTION_POINTERS`, relocated DLLs). Nitronic Rush and LEGO Island 2
+  translate byte for byte the same.
+
 ## v0.2.41 (2026-11-18)
 
 - **Miles, under `PORT_MILES_COPY_SAMPLES`: setting a sample's file follows the old order** (LEGO
@@ -454,6 +472,10 @@ Windows: its test race's hashes and runtime calls identical to Linux on all 3200
   through GetProcAddress; its Windows build links without `--export-all-symbols`.
 
 ## v0.2.19 (2026-11-14)
+
+**Moving a pin past here:** rewrite.c now calls `rewrite_audit_wrap`, so a port compiling only some
+of runtime/rewrite/*.c must add `runtime/rewrite/audit.c` (or compile all of them, as
+docs/REWRITE.md says), or the link fails. (Note added at v0.2.42.)
 
 From the first port rewritten to the end (every function hand-written C);
 everything is off unless a port asks (a flag, an environment variable, a PORT_ setting or a build
