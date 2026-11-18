@@ -3,6 +3,28 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.45 (2026-11-18)
+
+- **`PORT_X87_PORTABLE 1`: the x87 transcendentals give the same results on every x86 CPU.**
+  fsin, fcos, fsincos, fptan, fpatan, f2xm1, fyl2x and fyl2xp1 ran on the host's own x87, and Intel's
+  and AMD's differ in the last bits on all eight (measured: an i3-10100F and an i9-10900K agree with
+  each other and not with Ryzen 7 5800X3D / Ryzen AI 9 HX 370 PCs). So a recorded run's memory moved
+  between PCs: L.A. Rush's hash streams split between an AMD and an Intel PC at frame 204, Nitronic
+  Rush's at frame 100. With the setting, runtime/cpu/x87soft.h
+  computes them from + - * / and sqrt alone (which IEEE fixes bit for bit), in the full 64-bit
+  significand with round-to-nearest: π/2 reduction in four exact parts, Taylor kernels, angle
+  halving for the arctangent, the atanh series for the logarithms. Zeros, infinities and NaNs keep
+  the hardware's answer, which the x87 defines exactly.
+  - Accuracy against 400-bit references below 2^31: sin 1.5, cos 2.2, tan 2.9, atan2 2.7, f2xm1 2.8,
+    log2 1.1, log2(1+x) 2.3 units in the last place at worst. Near multiples of π the hardware is
+    worse (AMD's fsin(π) is off by 2·10^13 units; the software by 0.45).
+  - Results hash the same on the Ryzen AI 9, the i3 and the i9 over 2,000,000 inputs each.
+    The self-test passes with it on and off (`SELFTEST_CFLAGS=-DPORT_X87_PORTABLE=1`).
+  - Off by default, so recorded runs keep their values; a port that turns it on records its
+    baselines again once, and they then hold on every PC. The C2/C1 condition bits are 0 after a
+    soft result.
+- No regenerate.
+
 ## v0.2.44 (2026-11-18)
 
 - **Miles, under `PORT_MILES_COPY_SAMPLES`: streams as LEGO Island 2's runs had them** (its town

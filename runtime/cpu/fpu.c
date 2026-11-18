@@ -4,7 +4,7 @@
 #include <math.h>
 #include "cpu.h"
 #if __has_include("port.h")
-#include "port.h"                       /* (PORT_CPUID_* settings) */
+#include "port.h"                       /* (PORT_CPUID_* and PORT_X87_PORTABLE settings) */
 #endif
 
 static inline void host_fldcw(uint16_t cw) { __asm__ volatile("fldcw %0" : : "m"(cw)); }
@@ -141,11 +141,47 @@ void fpu_ldconst(CPU *c, int which)
     FPUSH(v);
 }
 
-void fpu_f2xm1(CPU *c) { f80 v = ST(0); __asm__("f2xm1" : "+t"(v)); ST(0) = v; }
+/* PORT_X87_PORTABLE 1: the transcendentals below by basic arithmetic (x87soft.h), the same on
+   every x86 CPU, instead of the host's instructions (bit for bit the original's on that CPU, but
+   Intel's and AMD's differ in the last bits). Off by default: recorded runs keep their values. */
+#ifndef PORT_X87_PORTABLE
+#define PORT_X87_PORTABLE 0
+#endif
+#if PORT_X87_PORTABLE
+#include "x87soft.h"
+#define SOFT_BEGIN(c) host_fldcw(0x037f)            /* (extended precision, nearest, all masked) */
+#define SOFT_END(c) host_fldcw(MASKED((c)->fcw))
+static int soft_ok(f80 x) { return isfinite(x) && x != 0; }
+#endif
+
+void fpu_f2xm1(CPU *c)
+{
+    f80 v = ST(0);
+#if PORT_X87_PORTABLE
+    if (soft_ok(v) && fabsl(v) <= 1.0L) {
+        SOFT_BEGIN(c);
+        ST(0) = x87s_f2xm1(v);
+        SOFT_END(c);
+        return;
+    }
+#endif
+    __asm__("f2xm1" : "+t"(v));
+    ST(0) = v;
+}
 
 void fpu_fyl2x(CPU *c)
 {
     f80 x = ST(0), y = ST(1), r;
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && x > 0 && x != 1.0L && soft_ok(y)) {
+        SOFT_BEGIN(c);
+        r = y * x87s_log2(x);
+        SOFT_END(c);
+        FPOP();
+        ST(0) = r;
+        return;
+    }
+#endif
     __asm__("fyl2x" : "=t"(r) : "0"(x), "u"(y) : "st(1)");
     FPOP();
     ST(0) = r;
@@ -154,6 +190,16 @@ void fpu_fyl2x(CPU *c)
 void fpu_fyl2xp1(CPU *c)
 {
     f80 x = ST(0), y = ST(1), r;
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && x > -1.0L && soft_ok(y)) {
+        SOFT_BEGIN(c);
+        r = y * x87s_log2p1(x);
+        SOFT_END(c);
+        FPOP();
+        ST(0) = r;
+        return;
+    }
+#endif
     __asm__("fyl2xp1" : "=t"(r) : "0"(x), "u"(y) : "st(1)");
     FPOP();
     ST(0) = r;
@@ -184,6 +230,16 @@ void fpu_fbstp(CPU *c, uint32_t a)
 void fpu_fpatan(CPU *c)
 {
     f80 x = ST(0), y = ST(1), r;
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && soft_ok(y)) {
+        SOFT_BEGIN(c);
+        r = x87s_atan2(y, x);
+        SOFT_END(c);
+        FPOP();
+        ST(0) = r;
+        return;
+    }
+#endif
     __asm__("fpatan" : "=t"(r) : "0"(x), "u"(y) : "st(1)");
     FPOP();
     ST(0) = r;
@@ -206,6 +262,17 @@ void fpu_fptan(CPU *c)
     uint16_t sw;
     if (trig_out_of_range(c, x))
         return;
+#if PORT_X87_PORTABLE
+    if (soft_ok(x)) {
+        SOFT_BEGIN(c);
+        f80 t = x87s_tan(x);
+        SOFT_END(c);
+        setcc(c, 0, 0x0600);
+        ST(0) = t;
+        FPUSH(1.0L);
+        return;
+    }
+#endif
     __asm__("fptan; fnstsw %2" : "=t"(one), "=u"(x), "=am"(sw) : "0"(x));
     setcc(c, sw, 0x0600);
     if (sw & 0x0400)                 /* out of range: operand unchanged, nothing pushed */
@@ -220,6 +287,18 @@ void fpu_fsincos(CPU *c)
     uint16_t sw;
     if (trig_out_of_range(c, x))
         return;
+#if PORT_X87_PORTABLE
+    if (soft_ok(x)) {
+        SOFT_BEGIN(c);
+        s = x87s_sin(x);
+        co = x87s_cos(x);
+        SOFT_END(c);
+        setcc(c, 0, 0x0600);
+        ST(0) = s;
+        FPUSH(co);
+        return;
+    }
+#endif
     __asm__("fsincos; fnstsw %2" : "=t"(co), "=u"(s), "=am"(sw) : "0"(x));
     setcc(c, sw, 0x0600);
     if (sw & 0x0400)
@@ -232,6 +311,15 @@ void fpu_fsin(CPU *c)
 {
     f80 x = ST(0);
     uint16_t sw;
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && fabsl(x) < 0x1p63L) {
+        SOFT_BEGIN(c);
+        ST(0) = x87s_sin(x);
+        SOFT_END(c);
+        setcc(c, 0, 0x0600);
+        return;
+    }
+#endif
     __asm__("fsin; fnstsw %1" : "+t"(x), "=am"(sw));
     setcc(c, sw, 0x0600);
     ST(0) = x;
@@ -241,6 +329,15 @@ void fpu_fcos(CPU *c)
 {
     f80 x = ST(0);
     uint16_t sw;
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && fabsl(x) < 0x1p63L) {
+        SOFT_BEGIN(c);
+        ST(0) = x87s_cos(x);
+        SOFT_END(c);
+        setcc(c, 0, 0x0600);
+        return;
+    }
+#endif
     __asm__("fcos; fnstsw %1" : "+t"(x), "=am"(sw));
     setcc(c, sw, 0x0600);
     ST(0) = x;

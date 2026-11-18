@@ -116,6 +116,7 @@ def build(gen):
     exe = os.path.join(BUILD, 'harness')
     sh('gcc', '-std=gnu11', '-O2', '-g', '-w', '-fno-strict-aliasing', '-frounding-math',
        '-DCPU_FAST_MEM', '-I' + gen, '-I' + os.path.join(ROOT, 'runtime', 'cpu'), '-I' + HERE,
+       *os.environ.get('SELFTEST_CFLAGS', '').split(),     # (e.g. -DPORT_X87_PORTABLE=1)
        '-o', exe, os.path.join(HERE, 'harness.c'), os.path.join(ROOT, 'runtime', 'cpu', 'fpu.c'),
        *srcs, '-lm')
     return exe
