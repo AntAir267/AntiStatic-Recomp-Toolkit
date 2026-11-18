@@ -3,6 +3,15 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.41 (2026-11-18)
+
+- **Miles, under `PORT_MILES_COPY_SAMPLES`: setting a sample's file follows the old order** (LEGO
+  Island 2's town route, frame 6221). Replacing a playing sample's file no longer pauses and rewinds
+  the old voice before freeing it, and the new voice gets its gain rather than a second rate (its
+  rate is set when it is made). Each of those calls reads the `--test` clock, so the old order moves
+  it 2 reads less per replacement. Same sound; nothing changes without the setting.
+- No regenerate.
+
 ## v0.2.40 (2026-11-18)
 
 - **Start-up raises the open-file limit** (Linux) from the soft limit to the hard one. Each open
