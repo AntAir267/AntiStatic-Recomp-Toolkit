@@ -20,7 +20,7 @@ Every key but `NAME` and `MODULES` (or `SHA256`) is optional.
 | --- | --- | --- |
 | `EXTRA_ENTRIES` | `[addr, ...]` | Function entries discovery can't reach (only called through pointers it can't see). |
 | `NOT_ENTRIES` | `[addr, ...]` | Addresses that look like code pointers but aren't functions. |
-| `JUMP_TABLES` | `{jmp_addr: (table, count)}` | Switch tables whose size the translator can't work out. |
+| `JUMP_TABLES` | `{jmp_addr: (table, count)}` | Switch tables whose size the translator can't work out. A listed table stays a bounded switch even when every entry is a function (its cases become tail calls); an unlisted table of functions is an indirect tail call. |
 | `NONLOCAL_JUMPS` | `[addr, ...]` | Jumps through a register or memory that leave the function for a place in a live one (exception continuations, a `longjmp`'s last jump): the runtime resumes the function that holds the place. |
 | `SETJMP` | `[addr, ...]` | `setjmp` functions linked into the program (a static C runtime): the place after each call to one can be resumed by a `longjmp`. Imported ones (`_setjmp`, `_setjmp3`, `setjmp`) and those a translated C runtime exports are found by name. |
 | `LONGJMP` | `[addr, ...]` | `longjmp` functions linked into the program: their jumps through a register or memory become `NONLOCAL_JUMPS`. A translated C runtime's `longjmp` is found by name; an imported one is the runtime's own. |

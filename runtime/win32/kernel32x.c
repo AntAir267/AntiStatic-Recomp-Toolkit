@@ -362,7 +362,12 @@ API(KERNEL32, GetCommandLineW, 0)
     static uint32_t w;
     if (!w) {
         char b[600];
-        snprintf(b, sizeof b, "\"%s\\%s\"%s" PORT_CMDLINE_ARGS, virtual_game_root(), port_cmdline_exe(), *PORT_CMDLINE_ARGS ? " " : "");
+#if defined(PORT_CMDLINE_EXE_W)
+        const char *exe = PORT_CMDLINE_EXE_W;   /* (the wide command line names another program) */
+#else
+        const char *exe = port_cmdline_exe();
+#endif
+        snprintf(b, sizeof b, "\"%s\\%s\"%s" PORT_CMDLINE_ARGS, virtual_game_root(), exe, *PORT_CMDLINE_ARGS ? " " : "");
         w = galloc(2 * (strlen(b) + 1));
         gwput(w, b, strlen(b) + 1);
     }

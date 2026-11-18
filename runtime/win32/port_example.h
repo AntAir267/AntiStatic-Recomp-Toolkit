@@ -21,6 +21,7 @@
 #define PORT_EXE "GAME.EXE"
 #define PORT_CMDLINE_ARGS ""
 /* #define PORT_CMDLINE_EXE "Game.exe" */   /* the name the command line shows, if not PORT_EXE (li2-native's runs) */
+/* #define PORT_CMDLINE_EXE_W "LARush.exe" */ /* GetCommandLineW's name, if not PORT_CMDLINE_EXE's (L.A. Rush's runs) */
 /* the volume label GetVolumeInformation reports for drive C: (some games check their CD's) */
 #define PORT_VOLUME_LABEL "MYGAME"
 
@@ -106,6 +107,8 @@
                                                   too (for a game that lists its devices once; default: keyboard only) */
 /* #define PORT_FILM_SKIP_ANY 1 */            /* any key or controller button skips a film (video_skip_press),
                                                   not only Escape */
+/* #define PORT_CURSOR_START_X 0 */           /* where GetCursorPos starts (320, 240 unless set) */
+/* #define PORT_CURSOR_START_Y 0 */
 /* #define PORT_DEFAULT_DISPLAY "fullscreen" */ /* start full screen unless options.txt says display = window */
 /* #define PORT_PAD_JOYS -1 */                /* ONE merged joystick (every controller drives it), made when the
                                                   first controller is plugged in and gone with the last: none with
