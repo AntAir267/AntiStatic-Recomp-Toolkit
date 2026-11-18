@@ -153,6 +153,8 @@ static void vlog(unsigned cat, const char *fmt, va_list ap)
     pthread_mutex_unlock(&log_lock);
 }
 
+int log_fd(void) { return logfp ? fileno(logfp) : -1; }
+
 void logmsg(unsigned cat, const char *fmt, ...)
 {
     va_list ap;
@@ -271,6 +273,9 @@ static int is_thunk(uint32_t t)
 /* a port's look at every call the program makes into the runtime through a thunk (COM methods,
    Direct3D: Enter the Matrix's and L.A. Rush's D3D inventories), before (after 0) and after (1) */
 void (*api_call_hook)(CPU *c, const char *name, int after);
+/* the same with the thunk's index (0 up, below THUNK_MAX: a profiler's table of calls), for a port's
+   own use: dialog.c and the D3D inventories take api_call_hook */
+void (*port_thunk_hook)(CPU *c, uint32_t index, const char *name, int after);
 
 /* --trace-calls FILE: every call into the runtime by name (imports too: they go through their
    thunks for the run), one line each: frame, call number, return address, name */
@@ -283,6 +288,8 @@ static void run_thunk(CPU *c, uint32_t t)
         fprintf(calls_fp, "%lu %lu %08x %s\n", frame_count, api_calls, R32(c->esp), n ? n : "?");
     if (api_call_hook && !thunk_replay)
         api_call_hook(c, n, 0);
+    if (port_thunk_hook && !thunk_replay)
+        port_thunk_hook(c, (t - THUNK_BASE) >> 4, n, 0);
     if ((log_mask & LOG_DRAW) && !thunk_replay)
         thunk_trace(c, t);
     if (draw_hashing && n && !strncmp(n, "IDirect3DDevice9::", 18))
@@ -294,6 +301,8 @@ static void run_thunk(CPU *c, uint32_t t)
     if (dev_recording) devrec_call_begin(c, t);
     thunk_fns[(t - THUNK_BASE) >> 4](c);
     if (dev_recording) devrec_call_end(c, t, n);
+    if (port_thunk_hook)
+        port_thunk_hook(c, (t - THUNK_BASE) >> 4, n, 1);
     if (api_call_hook)
         api_call_hook(c, n, 1);
 }
@@ -312,6 +321,11 @@ void icall(CPU *c, uint32_t t)
         icall_hook(c, t);
         return;
     }
+    if (is_thunk(t)) {                  /* (first: most calls through pointers are Direct3D's and COM's;
+                                           L.A. Rush's race 2.53 -> 2.44 ms a frame) */
+        run_thunk(c, t);
+        return;
+    }
     for (int i = 0; i < ntext_ranges; i++) {
         const TextRange *r = &text_ranges[i];
         if (t - r->lo < r->hi - r->lo) {
@@ -327,10 +341,6 @@ void icall(CPU *c, uint32_t t)
             fatal("call to %08x: code the translator did not find as a function (add it to "
                   "EXTRA_ENTRIES), return address %08x", t, R32(c->esp));
         }
-    }
-    if (is_thunk(t)) {
-        run_thunk(c, t);
-        return;
     }
     /* an ATL window thunk the program wrote into memory (CWndProcThunk: mov dword [esp+4], this;
        jmp WindowProc): the window procedure gets the object for the window handle, as the thunk
@@ -702,6 +712,175 @@ static void build_function_index(void)
 }
 
 /* ------------------------------------------------------------------ crashes */
+#if defined(__linux__) && defined(__x86_64__)
+/* A crash on a thread without a guest CPU (DXVK's, the driver's, SDL's) has no guest state to show,
+   so fatal()'s report was its first line only. Its report is written here from the signal handler
+   (from L.A. Rush's crash.c): the faulting address, the instruction's address with the module it
+   falls in and the offset there (from /proc/self/maps: addr2line -e MODULE OFFSET names it), the
+   thread's name, and a backtrace, each frame by module and offset, then by name where the dynamic
+   symbols have one (link -rdynamic). Written with write() alone, no lock and no allocation (the
+   thread may have crashed holding the log's lock or the heap's); the names last, as
+   backtrace_symbols_fd looks them up under the loader's lock. An alarm ends a report that hangs.
+   Then the signal's own action, so the exit status (128 + the signal) and a core dump are what they
+   would be without the handler. A guest thread's crash also gets its pc line, then fatal()'s report. */
+#include <sys/prctl.h>
+#include <sys/syscall.h>
+#include <ucontext.h>
+static int crash_log_fd = -1;
+static char crash_maps[1 << 20];        /* /proc/self/maps, read at the crash */
+static size_t crash_maps_n;
+
+static void crash_out(const char *s, size_t n)
+{
+    if (crash_log_fd >= 0 && write(crash_log_fd, s, n) < 0) {}
+    if (write(2, s, n) < 0) {}
+}
+
+void crash_line(const char *fmt, ...)
+{
+    char buf[512];
+    int n = snprintf(buf, sizeof buf, "%9.3f [-] ", (deterministic ? vclock : real_ms()) / 1000.0);
+    va_list ap;
+    va_start(ap, fmt);
+    n += vsnprintf(buf + n, sizeof buf - (size_t)n - 1, fmt, ap);
+    va_end(ap);
+    if (n > (int)sizeof buf - 2)
+        n = (int)sizeof buf - 2;
+    buf[n++] = '\n';
+    crash_out(buf, (size_t)n);
+}
+
+static void crash_maps_read(void)
+{
+    int fd = open("/proc/self/maps", O_RDONLY | O_CLOEXEC);
+    crash_maps_n = 0;
+    if (fd < 0)
+        return;
+    ssize_t r;
+    while (crash_maps_n < sizeof crash_maps - 1 &&
+           (r = read(fd, crash_maps + crash_maps_n, sizeof crash_maps - 1 - crash_maps_n)) > 0)
+        crash_maps_n += (size_t)r;
+    close(fd);
+    crash_maps[crash_maps_n] = 0;
+}
+
+/* the module holding a (its file's name, the mapping's name in brackets, or "?") and the offset from
+   where the file is loaded (its first mapping, file offset 0) */
+static const char *crash_module(uintptr_t a, uintptr_t *off, char *name, size_t cap)
+{
+    uintptr_t base = 0;
+    char cur[256] = "";
+    for (char *l = crash_maps; l < crash_maps + crash_maps_n; ) {
+        char *e = memchr(l, '\n', (size_t)(crash_maps + crash_maps_n - l));
+        if (!e) e = crash_maps + crash_maps_n;
+        unsigned long lo, hi, fo;
+        char perms[8];
+        int path_at = 0;
+        if (sscanf(l, "%lx-%lx %7s %lx %*s %*s %n", &lo, &hi, perms, &fo, &path_at) >= 4) {
+            const char *path = path_at && l + path_at < e ? l + path_at : "";
+            size_t pn = (size_t)(e - path);
+            if (pn >= sizeof cur) pn = sizeof cur - 1;
+            if (pn != strlen(cur) || memcmp(cur, path, pn)) {   /* a new file: its load base */
+                memcpy(cur, path, pn);
+                cur[pn] = 0;
+                base = lo - fo;
+            }
+            if (a >= lo && a < hi) {
+                const char *b = strrchr(cur, '/');
+                snprintf(name, cap, "%s", !cur[0] ? "?" : b ? b + 1 : cur);
+                *off = cur[0] == '/' ? a - base : a - lo;
+                return name;
+            }
+        }
+        l = e + 1;
+    }
+    snprintf(name, cap, "?");
+    *off = a;
+    return name;
+}
+
+static void host_crash_report(int sig, const char *sname, siginfo_t *si, ucontext_t *uc, CPU *c)
+{
+    char tname[17] = "";
+    prctl(PR_GET_NAME, (unsigned long)tname, 0, 0, 0);
+    long tid = syscall(SYS_gettid);
+    uintptr_t pc = (uintptr_t)uc->uc_mcontext.gregs[REG_RIP], off;
+    char mod[128];
+    crash_maps_read();
+    crash_line("FATAL: signal %d (%s) at address %p, %s thread \"%s\" (tid %ld)", sig, sname, si->si_addr,
+               c ? "game" : "host", tname, tid);
+    crash_module(pc, &off, mod, sizeof mod);
+    crash_line("  pc %#lx: %s+%#lx (sp %#lx)", (unsigned long)pc, mod, (unsigned long)off,
+               (unsigned long)uc->uc_mcontext.gregs[REG_RSP]);
+    extern void port_crash_report(int guest_thread) __attribute__((weak));
+    if (port_crash_report)
+        port_crash_report(c != NULL);       /* (the port's own lines, through crash_line) */
+    if (c)
+        return;                             /* (a game thread: fatal()'s report follows) */
+    void *bt[48];
+    int nb = backtrace(bt, 48), from = 0;
+    for (int i = 0; i < nb; i++)            /* (from the faulting frame: past the handler's) */
+        if ((uintptr_t)bt[i] == pc) { from = i; break; }
+    for (int i = from; i < nb; i++) {
+        crash_module((uintptr_t)bt[i], &off, mod, sizeof mod);
+        crash_line("  #%d %p %s+%#lx", i - from, bt[i], mod, (unsigned long)off);
+    }
+    crash_line("  the same frames by name:");
+    if (crash_log_fd >= 0)
+        backtrace_symbols_fd(bt + from, nb - from, crash_log_fd);
+    backtrace_symbols_fd(bt + from, nb - from, 2);
+}
+
+static void on_signal(int sig, siginfo_t *si, void *ucv)
+{
+    static volatile long reporting;
+    long me = syscall(SYS_gettid);
+    if (!__sync_bool_compare_and_swap(&reporting, 0, me)) {
+        if (reporting == me)
+            _exit(3);                       /* (a fault in the report itself) */
+        for (;;)
+            pause();                        /* (another thread's report ends the process) */
+    }
+    signal(SIGALRM, SIG_DFL);
+    alarm(5);                               /* (a report that hangs: the process ends) */
+    const char *sname = sig == SIGSEGV ? "Segmentation fault" : sig == SIGBUS ? "Bus error" :
+                        sig == SIGFPE ? "Floating point exception" : sig == SIGILL ? "Illegal instruction" :
+                        sig == SIGABRT ? "Aborted" : "?";
+    CPU *c = current_cpu();
+    host_crash_report(sig, sname, si, (ucontext_t *)ucv, c);
+    if (c)
+        fatal("signal %d (%s) at address %p", sig, sname, si->si_addr);    /* (the guest's state) */
+    alarm(0);
+    signal(sig, SIG_DFL);                   /* (the fault again, as if unhandled; abort's raised) */
+    if (sig == SIGABRT)
+        raise(sig);
+}
+
+static void crash_handlers_install(void)
+{
+    crash_log_fd = logfp ? fileno(logfp) : -1;
+    struct sigaction sa = {0};
+    sa.sa_sigaction = on_signal;
+    sa.sa_flags = SA_SIGINFO;
+    sigaction(SIGSEGV, &sa, NULL);
+    sigaction(SIGBUS, &sa, NULL);
+    sigaction(SIGFPE, &sa, NULL);
+    sigaction(SIGILL, &sa, NULL);
+    sigaction(SIGABRT, &sa, NULL);
+    void *warm[2];
+    backtrace(warm, 2);                     /* (loads the unwinder now, not in a crash's handler) */
+}
+#else
+void crash_line(const char *fmt, ...)
+{
+    char buf[512];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof buf, fmt, ap);
+    va_end(ap);
+    logmsg(LOG_ALWAYS, "%s", buf);
+}
+
 static __attribute__((unused)) void on_signal(int sig, siginfo_t *si, void *uc)
 {
     (void)uc;
@@ -710,6 +889,18 @@ static __attribute__((unused)) void on_signal(int sig, siginfo_t *si, void *uc)
         _exit(3);
     fatal("signal %d (%s) at address %p", sig, strsignal(sig), si->si_addr);
 }
+
+static void crash_handlers_install(void)
+{
+    struct sigaction sa = {0};
+    sa.sa_sigaction = on_signal;
+    sa.sa_flags = SA_SIGINFO;
+    sigaction(SIGSEGV, &sa, NULL);
+    sigaction(SIGBUS, &sa, NULL);
+    sigaction(SIGFPE, &sa, NULL);
+    sigaction(SIGILL, &sa, NULL);
+}
+#endif
 
 /* EXIT. The runtime's and the port's own exit work runs first (runtime_at_exit, last registered
    first; port_at_exit: e.g. stopping a render thread), then the process ends with _exit: no host
@@ -1128,14 +1319,21 @@ void frame_presented(void)
     if (fncheck_frame)
         fncheck_frame(game_frames);
     {
-        /* <PORT>_PEEK=addr[:n],... (hex; tests): those n dwords (default 1) logged every frame */
+        /* <PORT>_PEEK=addr[>off...][:n],... (addresses and offsets hex, n decimal; tests): those n
+           dwords (default 1) logged every frame. addr>off reads the dword at addr and adds off, up to
+           three times (L.A. Rush's pointer chains: 8a0850>14>8:2); a pointer outside the program's
+           memory (0x10000 up to 0x80000000) logs the entry as addr>- */
         static int np = -1;
-        static uint32_t pa[16], pn[16];
+        static uint32_t pa[16], pn[16], poff[16][3];
+        static int pdepth[16];
         if (np < 0) {
             np = 0;
             for (const char *e = port_getenv("PEEK"); e && *e && np < 16; ) {
                 char *q;
                 pa[np] = (uint32_t)strtoul(e, &q, 16);
+                pdepth[np] = 0;
+                while (*q == '>' && pdepth[np] < 3)
+                    poff[np][pdepth[np]++] = (uint32_t)strtoul(q + 1, &q, 16);
                 pn[np] = *q == ':' ? (uint32_t)strtoul(q + 1, &q, 10) : 1;
                 np++;
                 e = *q == ',' ? q + 1 : q;
@@ -1144,13 +1342,26 @@ void frame_presented(void)
         if (np) {
             char line[2048];
             int o = snprintf(line, sizeof line, "peek %lu", frame_count);
-            for (int k = 0; k < np; k++)
+            for (int k = 0; k < np; k++) {
+                uint32_t at = pa[k];
+                int bad = 0;
+                for (int d = 0; d < pdepth[k] && !bad; d++) {
+                    if (at < 0x10000u || at > 0x80000000u - 4) { bad = 1; break; }
+                    uint32_t p = R32(at);
+                    if (p < 0x10000u || p >= 0x80000000u) bad = 1;
+                    at = p + poff[k][d];
+                }
+                if (bad || (pdepth[k] && (at < 0x10000u || at > 0x80000000u - 4 * pn[k]))) {
+                    o += snprintf(line + o, sizeof line - o, " %08x>-", pa[k]);
+                    continue;
+                }
                 for (uint32_t j = 0; j < pn[k] && o < (int)sizeof line - 40; j++) {
-                    uint32_t w = R32(pa[k] + 4 * j);
+                    uint32_t w = R32(at + 4 * j);
                     float f;
                     memcpy(&f, &w, 4);
-                    o += snprintf(line + o, sizeof line - o, " %08x=%08x(%g)", pa[k] + 4 * j, w, f);
+                    o += snprintf(line + o, sizeof line - o, " %08x=%08x(%g)", at + 4 * j, w, f);
                 }
+            }
             LOG(LOG_ALWAYS, "%s", line);
         }
     }
@@ -1339,13 +1550,7 @@ int main(int argc, char **argv)
         if (!logfp)
             fatal("cannot write %s", logpath);
     }
-    struct sigaction sa = {0};
-    sa.sa_sigaction = on_signal;
-    sa.sa_flags = SA_SIGINFO;
-    sigaction(SIGSEGV, &sa, NULL);
-    sigaction(SIGBUS, &sa, NULL);
-    sigaction(SIGFPE, &sa, NULL);
-    sigaction(SIGILL, &sa, NULL);
+    crash_handlers_install();
 #ifndef _WIN32
     /* Windows has no open-file limit a game would meet, and each open guest file is one host
        descriptor here: the usual soft limit of 1,024 stops a game that keeps a few thousand open

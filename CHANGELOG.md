@@ -3,6 +3,36 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.43 (2026-11-18)
+
+L.A. Rush's open gaps 3, 4, 5, 7, 8 and 9, in the shapes its chat asked for:
+- **Crash reports for host threads** (Linux x86-64; from L.A. Rush's crash.c). A crash on a thread
+  with no guest CPU (DXVK's, the driver's, SDL's) is reported from the signal handler: the faulting
+  address, the thread's name, the pc as module+offset (for `addr2line`) and a backtrace by
+  module+offset, then by name. Written with write() only; an alarm ends a report that hangs; then the
+  signal's own action, so the exit status (128 + the signal) and a core dump are as without it. A
+  game thread's crash gets the pc line and then fatal()'s report as before. SIGABRT is caught too.
+  `crash_line(fmt, ...)` and an optional `port_crash_report(int guest_thread)` add a port's lines;
+  `log_fd()` gives the log file's descriptor. A port's own handler can go.
+- **`port_thunk_hook(c, index, name, after)`**: the per-call hook with the thunk's index (a
+  profiler's table), before and after every call into the runtime through a thunk, beside
+  `api_call_hook` (by name). One predictable branch per call when unset.
+- **Speed**: calls through pointers check the thunks before the module ranges (most are Direct3D's
+  and COM's; L.A. Rush's race 2.53 -> 2.44 ms a frame in its runtime), and `com_host` / `d3d_host`
+  are inline (2.21 -> 2.12 ms).
+- **`port_file_redirect(rel, out, n)`**: a port's own place for a game file it reads, before the
+  user folder, mods and xbox_data (writes still go to the user folder).
+- **File answers as Windows gives them** (FIXES.md 2026-11-12): CREATE_NEW / CREATE_ALWAYS /
+  TRUNCATE_EXISTING without GENERIC_WRITE, and OPEN_ALWAYS of a file that is nowhere, make the file
+  in the user folder, not the game folder; MoveFile onto a target that exists fails with
+  ERROR_ALREADY_EXISTS; CreateDirectory of a folder the game folder has says ERROR_ALREADY_EXISTS;
+  GetTempFileName takes the next free number instead of emptying a file.
+- **`decomp = NAME`**: only the rewrites of a port's named set, from
+  `const char *port_rewrite_subset(const char *name)` (a hex comma list; NULL: no such set).
+- **PEEK pointer chains**: `<PORT_ENV>_PEEK=addr>off>off:n` reads the dword at addr and adds off,
+  up to three times; a pointer outside the program's memory logs `addr>-`.
+- No regenerate.
+
 ## v0.2.42 (2026-11-18)
 
 From L.A. Rush's move (its gaps 14-18):

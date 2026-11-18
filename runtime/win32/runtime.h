@@ -155,6 +155,12 @@ CPU *cpu_new(uint32_t stack_size);
 void runtime_setup(void);
 void set_current_cpu(CPU *c);
 CPU *current_cpu(void);
+/* crashes (main.c): a line of a crash report, safe in a signal handler on Linux (write() only, no
+   lock); the port's own lines go in port_crash_report (optional), called after the faulting pc's line
+   on any thread. log_fd: the log file's descriptor, or -1. */
+void crash_line(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+void port_crash_report(int guest_thread);
+int log_fd(void);
 uint32_t current_thread_id(void);
 void set_last_error(uint32_t e);
 uint32_t get_last_error(void);
@@ -207,7 +213,18 @@ void settings_delete(const char *key, const char *name);
    The host side keeps its own struct; com_host() finds it from the program's pointer. */
 typedef struct { const char *iface; int nmethods; uint32_t vtbl; } ComClass;
 uint32_t com_new(ComClass *cls, void *host);
-void *com_host(uint32_t obj);
+#define COM_MAGIC 0x4d4f4321u    /* "!COM" */
+#define COM_HOST_CHUNK 4096
+extern void **com_hosts[];
+extern uint32_t com_nhosts;
+void com_host_bad(uint32_t obj) __attribute__((noreturn, cold));
+static inline void *com_host(uint32_t obj)   /* (inline: from L.A. Rush's runtime, 2.21 -> 2.12 ms a frame) */
+{
+    uint32_t id = obj ? R32(obj + 8) : 0;
+    if (__builtin_expect(!obj || R32(obj + 4) != COM_MAGIC || id >= __atomic_load_n(&com_nhosts, __ATOMIC_ACQUIRE), 0))
+        com_host_bad(obj);
+    return com_hosts[id / COM_HOST_CHUNK][id % COM_HOST_CHUNK];
+}
 void com_set_class(uint32_t obj, ComClass *cls);
 void com_class_init(ComClass *cls, const char *iface, int n, void (*const *methods)(CPU *),
                     const char *const *names);
@@ -288,4 +305,5 @@ void registry_set_dword(const char *key, const char *name, uint32_t v);
 double host_ms(void);                    /* the host's clock in ms, whatever --test does (main.c) */
 extern double test_frame_ms;             /* --test: the virtual clock's step this frame */
 extern void (*api_call_hook)(CPU *c, const char *name, int after);   /* every thunk call (main.c) */
+extern void (*port_thunk_hook)(CPU *c, uint32_t index, const char *name, int after);   /* the same, the port's, with the thunk's index */
 int shots_requested(void);               /* --shot frames asked for (main.c) */

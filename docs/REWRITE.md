@@ -21,6 +21,7 @@ here without any game's code.
 | `runtime/rewrite/rewrite.h` | `DECOMP(address, fn)` registers a rewrite, at file scope, in any file of the port. Also the calling helpers below. |
 | `runtime/rewrite/rewrite.c` | `rewrite_install()`, which the runtime core runs at start-up after `game_init`. It switches in every registered rewrite, then every stack fix. |
 | option `decomp = off`, `<PORT_ENV>_DECOMP_OFF=addr,addr` or `all` | Leaves rewrites out: all of them, or the listed ones. This is how the A/B check runs the translation, and how a difference is bisected. |
+| option `decomp = NAME` | Only the rewrites of one of the port's named sets: `const char *port_rewrite_subset(const char *name)` returns their addresses as a hex comma list (NULL: no such set). `_DECOMP_OFF` still applies on top. |
 | `STACKFIX(address, bytes, hook)` | Clears a leaking function's dead stack on entry, in both modes (see Stack leftovers). `<PORT_ENV>_STACKFIX_OFF=addr,...` leaves fixes out, to see what one changes. |
 | `runtime/rewrite/coverage.c` | Coverage builds: every translated function a run enters, written at exit to the file `<PORT_ENV>_COVERAGE` names. |
 | `tools/rewrite/ab.sh` | The A/B check; with `--fncheck SPEC` the per-function check. |
