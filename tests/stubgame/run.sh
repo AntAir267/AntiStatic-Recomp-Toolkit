@@ -50,7 +50,11 @@ open(sys.argv[2] + '/fncheck.spec', 'w').write(open('tests/stubgame/fncheck.spec
 # the game's own setjmp / longjmp (game.c): the build config's SETJMP / LONGJMP
 sj, lj = m.export('my_setjmp'), m.export('my_longjmp')
 assert sj and lj, sorted(m.exports)
-open(sys.argv[2] + '/setjmp_cfg.py', 'w').write('SETJMP = [0x%x]\nLONGJMP = [0x%x]\n' % (sj, lj))
+# the stand-in for MSVCR90's __CxxFrameHandler3 (game.c eh_cxx): the build config's CXX_FRAME_HANDLERS
+ch = m.export('eh_cxx_handler')
+assert ch, sorted(m.exports)
+open(sys.argv[2] + '/setjmp_cfg.py', 'w').write('SETJMP = [0x%x]\nLONGJMP = [0x%x]\nCXX_FRAME_HANDLERS = [0x%x]\n'
+                                              % (sj, lj, ch))
 PY
 cat > $B/stub_cfg.py <<CFG
 NAME = 'stub-game'

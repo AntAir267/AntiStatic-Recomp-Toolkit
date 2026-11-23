@@ -125,6 +125,31 @@ SETJMP_NAMES = {'_setjmp', '_setjmp3', 'setjmp', '_setjmpex'}
 LONGJMP_NAMES = {'longjmp'}
 
 
+def frame_switch_jumps(funcs):
+    """`jmp reg` within six instructions after both `mov esp, X` (X not ebp: an epilogue's
+    `mov esp, ebp; pop ebp` restores the caller's own frame) and `mov ebp, Y` (not a pop)."""
+    out = set()
+    for f in funcs.values():
+        addrs = sorted(f.insns)
+        for n, a in enumerate(addrs):
+            i = f.insns[a]
+            if i.mn != 'jmp' or not i.ops or i.ops[0][0] != 'r':
+                continue
+            sp = bp = False
+            for b in addrs[max(0, n - 6):n]:
+                j = f.insns[b]
+                if j.mn != 'mov' or len(j.ops) != 2 or j.ops[0][0] != 'r':
+                    continue
+                src = j.ops[1]
+                if j.ops[0][1] == 'esp' and not (src[0] == 'r' and src[1] == 'ebp'):
+                    sp = True
+                elif j.ops[0][1] == 'ebp':
+                    bp = True
+            if sp and bp:
+                out.add(a)
+    return out
+
+
 def setjmp_places(cfg, mods, funcs, host, links):
     """({function: return addresses of its setjmp calls}, {longjmp's indirect jumps}).
     setjmp is an import by name (the runtime's, or a translated C runtime's export), a function
@@ -406,6 +431,14 @@ def main():
     # like a catch's (runtime/win32/eh.c); a translated longjmp's last jump is a nonlocal jump
     prog.setjmp_places, lj_jumps = setjmp_places(cfg, mods, funcs, host, links)
     prog.nonlocal_jumps |= lj_jumps
+    # a C runtime's own continuation jumps (MSVCR90's _JumpToContinuation, its catch-block frame
+    # switch): a jump through a register just after esp and ebp are both loaded from somewhere
+    # new goes on in another function's frame, so the runtime resumes the function that holds the
+    # place (build config NONLOCAL_JUMPS, found here) instead of calling it as a function
+    fj = frame_switch_jumps(funcs)
+    prog.nonlocal_jumps |= fj
+    if fj:
+        print('frame-switching jumps (continuations): %s' % ' '.join('%08x' % a for a in sorted(fj)))
     if prog.setjmp_places:
         print('setjmp: %d calls in %d functions; %d translated longjmp jumps' % (
             sum(len(v) for v in prog.setjmp_places.values()), len(prog.setjmp_places), len(lj_jumps)))

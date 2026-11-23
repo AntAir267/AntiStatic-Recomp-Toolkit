@@ -3,6 +3,39 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.47 (2026-11-23)
+
+**Caught exceptions go on in Visual C++ 2005/2008 programs** (Nitronic Rush's MSVCR90; the item open
+since v0.2.13). **Regenerate** (the translation changes); **record baselines again** only if your
+generated code changed beyond `icall` -> `ijump` (L.A. Rush's and LEGO Island 2's runs don't reach
+the changed code).
+- **SEH4 scope tables** (translator/eh.py): `push -2; push <table>; push <handler>` frames and
+  `__SEH_prolog4` ones (the helper known by its own first bytes), the table's 16-byte cookie
+  header, -2 as the outermost level. Nitronic Rush: 2 -> 206 scope tables, 144 -> 204 places.
+- **`__except` blocks are translated** as code of their own (SEH3 and SEH4): normal flow jumps over
+  them, and a program without relocations gave no other way to find them (Nitronic Rush had 5 that
+  were never translated).
+- **A C runtime's continuation jumps are found by the translator**: a jump through a register right
+  after esp and ebp are both loaded anew (not an epilogue's `mov esp, ebp; pop ebp`) is a non-local
+  jump, which resumes the live function holding the place with that esp and ebp. That is
+  `_JumpToContinuation` in MSVCR90 (0x7857d796, and its catch-block frame switch 0x7857da11), MSVCR71
+  (L.A. Rush) and LEGO Island 2's statically linked CRT. Before, it went through `icall`, which took
+  esp from an SEH3 frame's slot: wrong for a C++ frame.
+- **`ijump`**: a jump through a register (an indirect tail call) now calls `ijump`, which is `icall`
+  except while an exception is dispatched: then a jump to a place a live frame goes on at resumes
+  that frame. An SEH4 handler goes into an `__except` block that is also a translated function;
+  calling it as one returned from the wrong frame. Calls never resume (handlers call funclets).
+  A port with its own `icall` (an offline checker) needs an `ijump` beside it.
+- Catch funclets' continuations are read up to the padding after a `ret`: reading on into the next
+  function took its `mov eax, imm; ... ret` for a continuation.
+- **`HOOKS = {addr: 'test_throw'}`** with `<PORT_ENV>_TEST_THROW=N`: the function's Nth call throws a
+  C++ `int` from its first instruction, to check on the real game that a catch goes on.
+- Checked: the stub game has a VC 2008 try/catch (FuncInfo 0x19930522, MSVCR90's
+  `_JumpToContinuation` instructions) and an SEH4 `__try/__except` (an `__except` block reached only
+  from its table), each thrown into from two calls down: both go on in their own frame with their
+  locals. Self-test unchanged. Translations: LEGO Island 2 and L.A. Rush differ only in their
+  continuation jumps (and `ijump`); Nitronic Rush gains the tables, places and 6 functions above.
+
 ## v0.2.46 (2026-11-23)
 
 Test runs give the same results on every PC: recorded routes no longer depend on the CPU's maker or

@@ -225,6 +225,7 @@ void fpu_rstor(CPU *c, uint32_t a);
 /* ------------------------------------------------------------------ control flow */
 
 void icall(CPU *c, uint32_t target);                 /* call through a pointer */
+void ijump(CPU *c, uint32_t target);                 /* jump through a pointer (an indirect tail call) */
 void bad_ret(CPU *c, uint32_t site, uint32_t expected);
 void bad_jump(CPU *c, uint32_t site, uint32_t target);
 void nonlocal_jump(CPU *c, uint32_t site, uint32_t target);

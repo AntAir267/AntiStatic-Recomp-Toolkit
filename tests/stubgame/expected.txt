@@ -19,6 +19,9 @@ maths 6d3fb096
 mix 771ab9a8
 setjmp_imported 7241
 setjmp_own 1241
+eh_cxx_catch_resumes 4177
+eh_seh4_except_resumes 8290
+eh_after_throw 0
 ds_create 1
 ds_buffer 1
 ds_lock 1

@@ -68,6 +68,8 @@ static void (*find(uint32_t a))(CPU *)
     return 0;
 }
 
+void ijump(CPU *c, uint32_t t);
+void ijump(CPU *c, uint32_t t) { icall(c, t); }
 void icall(CPU *c, uint32_t t)
 {
     void (*f)(CPU *) = find(t);

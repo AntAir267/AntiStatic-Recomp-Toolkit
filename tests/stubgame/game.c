@@ -137,6 +137,78 @@ static __attribute__((noinline)) unsigned setjmp_test(int own)
     return (unsigned)r * 1000 + passes * 100 + (unsigned)keep + (unsigned)unwound;
 }
 
+/* EXCEPTIONS AS VISUAL C++ 2008 HAS THEM (Nitronic Rush's MSVCR90), hand-written because this stub
+   isn't built by MSVC. eh_cxx: a function with a try block (FuncInfo magic 0x19930522, its
+   __ehhandler stub, a catch(...) funclet returning the place to go on at); the handler does what
+   MSVCR90's does at the end: calls the funclet with the frame's ebp, then _JumpToContinuation's own
+   instructions (unlink the registration, ebp and esp from the frame, jmp eax), which the translator
+   finds as a frame-switching jump. eh_seh4: a function with an SEH4 frame (push -2, a scope table
+   with its 16-byte cookie header, an __except block nothing else reaches) and a handler that calls
+   the filter and goes into the block as _EH4_TransferToHandler does (ebp set, jmp). Each throws
+   from a C function two calls down; the result shows the place was reached with the frame intact. */
+static volatile unsigned eh_after_throw;
+__attribute__((noinline)) void __cdecl eh_throw2(DWORD code)
+{
+    ULONG_PTR args[3] = {0x19930520, 0, 0};
+    RaiseException(code, 1, code == 0xe06d7363 ? 3 : 0, args);
+    eh_after_throw++;                   /* never: the throw doesn't come back */
+}
+__attribute__((noinline)) void __cdecl eh_throw1(DWORD code) { eh_throw2(code); eh_after_throw++; }
+unsigned __cdecl eh_cxx(void);
+unsigned __cdecl eh_seh4(void);
+__asm__(".intel_syntax noprefix\n"
+        ".text\n"
+        ".globl _eh_cxx\n_eh_cxx:\n"
+        "  push ebp\n  mov ebp, esp\n  push -1\n  .byte 0x68\n  .long _eh_cxx_stub\n"
+        "  mov eax, dword ptr fs:[0]\n  push eax\n  sub esp, 0xc\n  push ebx\n  push esi\n"
+        "  mov dword ptr [ebp-0x10], esp\n  lea eax, [ebp-0xc]\n  mov dword ptr fs:[0], eax\n"
+        "  mov dword ptr [ebp-4], 0\n  mov dword ptr [ebp-0x14], 0x51\n"
+        "  push 0xe06d7363\n  call _eh_throw1\n  add esp, 4\n  mov dword ptr [ebp-0x14], 0\n"
+        "  jmp _eh_cxx_cont\n"
+        "_eh_cxx_cont:\n"
+        "  mov dword ptr [ebp-4], -1\n  mov eax, dword ptr [ebp-0x14]\n  add eax, 0x1000\n"
+        "  mov ecx, dword ptr [ebp-0xc]\n  mov dword ptr fs:[0], ecx\n"
+        "  lea esp, [ebp-0x20]\n  pop esi\n  pop ebx\n  mov esp, ebp\n  pop ebp\n  ret\n"
+        "_eh_cxx_catch:\n  mov eax, offset _eh_cxx_cont\n  ret\n  int3\n  int3\n"
+        "_eh_cxx_stub:\n  mov eax, offset _eh_cxx_funcinfo\n  .byte 0xe9\n  .long _eh_cxx_handler - . - 4\n"
+        ".globl _eh_cxx_handler\n_eh_cxx_handler:\n"
+        "  mov ecx, dword ptr [esp+4]\n  test dword ptr [ecx+4], 6\n  jnz 1f\n"
+        "  mov edx, dword ptr [esp+8]\n  push ebp\n  lea ebp, [edx+0xc]\n  mov eax, offset _eh_cxx_catch\n"
+        "  call eax\n  pop ebp\n  mov edx, dword ptr [esp+8]\n  push edx\n  push eax\n  call _eh_jump_to_cont\n"
+        "1:\n  mov eax, 1\n  ret\n"
+        "_eh_jump_to_cont:\n"
+        "  push ebp\n  mov ebp, esp\n  push ecx\n  push ebx\n  mov eax, dword ptr [ebp+0xc]\n  add eax, 0xc\n"
+        "  mov dword ptr [ebp-4], eax\n  mov ebx, dword ptr fs:[0]\n  mov eax, dword ptr [ebx]\n"
+        "  mov dword ptr fs:[0], eax\n  mov eax, dword ptr [ebp+8]\n  mov ebx, dword ptr [ebp+0xc]\n"
+        "  mov ebp, dword ptr [ebp-4]\n  mov esp, dword ptr [ebx-4]\n  jmp eax\n"
+        ".globl _eh_seh4\n_eh_seh4:\n"
+        "  push ebp\n  mov ebp, esp\n  push -2\n  .byte 0x68\n  .long _eh_seh4_table\n  .byte 0x68\n  .long _eh_seh4_handler\n"
+        "  mov eax, dword ptr fs:[0]\n  push eax\n  push esi\n  sub esp, 8\n"
+        "  mov dword ptr [ebp-0x18], esp\n  lea eax, [ebp-0x10]\n  mov dword ptr fs:[0], eax\n"
+        "  mov dword ptr [ebp-4], 0\n  mov dword ptr [ebp-0x1c], 0x62\n"
+        "  push 0xe0000001\n  call _eh_throw1\n  add esp, 4\n  mov dword ptr [ebp-0x1c], 0\n"
+        "  mov dword ptr [ebp-4], -2\n  jmp 2f\n"
+        "_eh_seh4_except:\n  mov esp, dword ptr [ebp-0x18]\n  mov dword ptr [ebp-4], -2\n"
+        "  add dword ptr [ebp-0x1c], 0x2000\n"
+        "2:\n  mov eax, dword ptr [ebp-0x1c]\n  mov ecx, dword ptr [ebp-0x10]\n  mov dword ptr fs:[0], ecx\n"
+        "  lea esp, [ebp-0x14]\n  pop esi\n  mov esp, ebp\n  pop ebp\n  ret\n"
+        "_eh_seh4_filter:\n  mov eax, 1\n  ret\n"
+        "_eh_seh4_handler:\n"
+        "  mov ecx, dword ptr [esp+4]\n  test dword ptr [ecx+4], 6\n  jnz 3f\n"
+        "  mov edx, dword ptr [esp+8]\n  mov ecx, dword ptr [edx+8]\n  push ebp\n  lea ebp, [edx+0x10]\n"
+        "  mov eax, dword ptr [ecx+20]\n  call eax\n  pop ebp\n"
+        "  mov edx, dword ptr [esp+8]\n  mov ecx, dword ptr [edx+8]\n  mov esi, dword ptr [ecx+24]\n"
+        "  lea ebp, [edx+0x10]\n  xor eax, eax\n  xor ecx, ecx\n  xor edx, edx\n  jmp esi\n"
+        "3:\n  mov eax, 1\n  ret\n"
+        ".section .rdata,\"dr\"\n  .p2align 2\n"
+        "_eh_cxx_funcinfo:\n  .long 0x19930522, 1, _eh_cxx_unwind, 1, _eh_cxx_tryblocks, 0, 0, 0, 0\n"
+        "_eh_cxx_unwind:\n  .long -1, 0\n"
+        "_eh_cxx_tryblocks:\n  .long 0, 0, 1, 1, _eh_cxx_handlers\n"
+        "_eh_cxx_handlers:\n  .long 0, 0, 0, _eh_cxx_catch\n"
+        "_eh_seh4_table:\n  .long -2, 0, -0x24, 0\n  .long -2, _eh_seh4_filter, _eh_seh4_except\n"
+        ".text\n.att_syntax\n"
+        ".section .drectve\n.ascii \" -export:eh_cxx_handler\"\n.text\n");
+
 /* DIRECTSOUND, the way games use it: a buffer filled by Lock, played looping, its play position
    read back while time passes (the game's clock), stopped, played once to its end, faster.
    The checks are on what a game relies on: positions advance at the buffer's own rate, the
@@ -397,6 +469,9 @@ void __stdcall start(void)
     put("mix "); put_hex(stub_mix(0x12345678u, 0xcafef00du)); put("\n");
     line("setjmp_imported", setjmp_test(0));
     line("setjmp_own", setjmp_test(1));
+    line("eh_cxx_catch_resumes", eh_cxx());
+    line("eh_seh4_except_resumes", eh_seh4());
+    line("eh_after_throw", eh_after_throw);
     sound_test();
     miles_test();
     link_test();

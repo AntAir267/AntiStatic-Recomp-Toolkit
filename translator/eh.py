@@ -14,6 +14,13 @@ scope table entries {enclosingLevel, filter, handler}: with a filter (called) th
 __except block, entered by a call that never returns (a place to resume at); without one it is
 a __finally block (called).
 
+SEH4 (Visual C++ 2005/2008, _except_handler4): the prologue pushes -2, its scope table and the
+handler (6A FE 68 <table> 68 <handler>), or calls __SEH_prolog4 after pushing the table (the helper
+is known by its own first bytes: push <handler>; push fs:[0]). The table starts with four cookie
+offsets (16 bytes); its entries are as SEH3's with -2 as the outermost level. The scope table is
+what the prologue pushes (the handler stores it XORed with the security cookie, which the
+translation never reads), so places are keyed by it as SEH3's are.
+
 scan() returns (entries, places, ...): addresses to translate as functions, and per
 registration (the __ehhandler stub or the scope table, which the owning function's prologue
 pushes) the addresses execution may go on at after its handlers (codegen gives the pushing
@@ -35,7 +42,9 @@ def _u32(img, va):
 
 
 def _continuations(img, md, start, limit=0x400):
-    """The `mov eax, imm32` values a catch funclet returns (each `ret` after one)."""
+    """The `mov eax, imm32` values a catch funclet returns (each `ret` after one), up to the
+    padding after a `ret` (int3 or nop, as compilers put between functions): reading on into the
+    next function took its `mov eax, imm; ... ret` for a continuation."""
     out = set()
     data = img.bytes(start, limit)
     last_imm = None
@@ -47,6 +56,9 @@ def _continuations(img, md, start, limit=0x400):
                 out.add(last_imm)
                 last_imm = None
             else:
+                break
+            nb = img.bytes(i.address + i.size, 1)
+            if not nb or nb[0] in (0xcc, 0x90):
                 break
         elif i.mnemonic in ('int3',):
             break
@@ -76,6 +88,21 @@ def handler_addresses(img, name):
     return out
 
 
+SEH4_TOP = 0xfffffffe
+
+
+def _seh4_prolog_helper(img, a):
+    """Is a an __SEH_prolog4 (/_GS): push <handler>; push dword fs:[0]"""
+    b = img.bytes(a, 12) if img.in_text(a) else b''
+    return len(b) == 12 and b[0] == 0x68 and b[5:12] == b'\x64\xff\x35\x00\x00\x00\x00'
+
+
+def _seh4_table_ok(img, st):
+    """A plausible SEH4 scope table: its outermost entry's level is -2 and its handler is code."""
+    enc, hnd = _u32(img, st + 16), _u32(img, st + 24)
+    return enc == SEH4_TOP and hnd is not None and img.in_text(hnd)
+
+
 def scan(img, cxx_handlers=None, seh_handlers=None, seh_prologs=()):
     """cxx_handlers / seh_handlers: addresses that mean __CxxFrameHandler / _except_handler3
     (the functions, the import slots holding them and jump thunks to them); seh_prologs: MSVC 7's
@@ -86,7 +113,8 @@ def scan(img, cxx_handlers=None, seh_handlers=None, seh_prologs=()):
         seh_handlers = handler_addresses(img, '_except_handler3')
     md = Cs(CS_ARCH_X86, CS_MODE_32)
     entries, places = set(), {}
-    funcinfos, scopetables = {}, set()          # FuncInfo -> its stubs
+    funcinfos, scopetables, scopetables4 = {}, set(), set()     # FuncInfo -> its stubs
+    prolog4 = {}                                # helper address -> is __SEH_prolog4
     for m in img.modules:
         lo, hi = m.text_range()
         code = img.bytes(lo, hi - lo)
@@ -110,6 +138,26 @@ def scan(img, cxx_handlers=None, seh_handlers=None, seh_prologs=()):
                 if h in seh_handlers:
                     scopetables.add(st)
             k = code.find(b'\x6a\xff\x68', k + 1)
+        # SEH4: 6A FE 68 <scopetable> 68 <handler> 64 A1 00 00 00 00 (or 64 8B 0D / 64 FF 35: other
+        # registers), the table checked for SEH4's shape
+        k = code.find(b'\x6a\xfe\x68')
+        while k >= 0 and k + 15 <= len(code):
+            if code[k + 7] == 0x68 and code[k + 12] == 0x64:
+                st = struct.unpack_from('<I', code, k + 3)[0]
+                if _seh4_table_ok(img, st):
+                    scopetables4.add(st)
+            k = code.find(b'\x6a\xfe\x68', k + 1)
+        # SEH4 through __SEH_prolog4: push <locals size>; push <scopetable>; call <helper>
+        k = code.find(b'\x68')
+        while k >= 0 and k + 15 <= len(code):
+            if code[k + 5] == 0xe8:
+                tgt = (lo + k + 10 + struct.unpack_from('<i', code, k + 6)[0]) & 0xffffffff
+                if tgt not in prolog4:
+                    prolog4[tgt] = _seh4_prolog_helper(img, tgt)
+                st = struct.unpack_from('<I', code, k + 1)[0]
+                if prolog4[tgt] and _seh4_table_ok(img, st):
+                    scopetables4.add(st)
+            k = code.find(b'\x68', k + 1)
         # SEH3 through a helper (MSVC 7's __SEH_prolog, build config SEH_PROLOGS): push <locals size>;
         # push <scopetable>; call <helper> (from penguins-native: 78 functions in Penguins!, the
         # CRT's _threadstartex among them)
@@ -149,7 +197,25 @@ def scan(img, cxx_handlers=None, seh_handlers=None, seh_prologs=()):
                 if not img.in_text(flt):
                     break
                 entries.add(flt)
+                entries.add(hnd)        # (the __except block: see SEH4's below)
                 places.setdefault(st, set()).add(hnd)
             else:
                 entries.add(hnd)
-    return entries, places, len(funcinfos), len(scopetables)
+    for st in sorted(scopetables4):
+        for e in range(64):
+            base = st + 16 + 12 * e
+            enc, flt, hnd = _u32(img, base), _u32(img, base + 4), _u32(img, base + 8)
+            if enc is None or not (enc == SEH4_TOP or enc < e) or not hnd or not img.in_text(hnd):
+                break
+            if flt:
+                if not img.in_text(flt):
+                    break
+                entries.add(flt)
+                # the __except block: a place, and code of its own to translate (normal flow jumps
+                # over it; a program without relocations gave no other way to find it: Nitronic
+                # Rush's 5 "not translated")
+                entries.add(hnd)
+                places.setdefault(st, set()).add(hnd)
+            else:
+                entries.add(hnd)
+    return entries, places, len(funcinfos), len(scopetables) + len(scopetables4)

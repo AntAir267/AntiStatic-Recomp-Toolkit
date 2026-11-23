@@ -315,6 +315,19 @@ int call_thunk(CPU *c, uint32_t t)
     return 1;
 }
 
+/* a jump through a pointer: an indirect tail call, except while an exception is dispatched, when
+   a jump to a place a live frame goes on at resumes that frame (an SEH4 handler going into an
+   __except block that is also a translated function; eh.c). Calls never resume: that is how
+   handlers call funclets. */
+void ijump(CPU *c, uint32_t t)
+{
+    extern __thread int eh_dispatching;
+    extern int eh_resume_place(CPU *c, uint32_t target);
+    if (__builtin_expect(eh_dispatching, 0) && eh_resume_place(c, t))
+        return;
+    icall(c, t);
+}
+
 void icall(CPU *c, uint32_t t)
 {
     if (icall_hook) {
@@ -409,7 +422,8 @@ void nonlocal_jump(CPU *c, uint32_t site, uint32_t target)
     extern int eh_resume_at(CPU *c, uint32_t target, uint32_t esp, uint32_t ebp);
     if (!eh_resume_at(c, target, c->esp, c->ebp))
         fatal("nonlocal jump at %08x to %08x, which no live function holds (a setjmp the translator "
-              "did not see: build config SETJMP)", site, target);
+              "did not see: build config SETJMP; or a catch / __except place the exception tables "
+              "didn't give: translator/eh.py)", site, target);
 }
 void unsupported(CPU *c, uint32_t site, const char *what)
 {

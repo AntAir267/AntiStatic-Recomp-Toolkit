@@ -17,11 +17,16 @@
    there on the host, abandoning the host frames between (they hold nothing: guest_call's saved
    registers are replaced by the ones resumed with). */
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include "runtime.h"
 #include "funcs.h"
 
 static __thread EHFrame *eh_top;
+/* while handlers run for an exception (raise_exception's loop): icall then resumes a live frame
+   whose place it is sent to rather than calling it, as an __except block can also be a function of
+   its own (found through the scope table's pointer) that an SEH4 handler jumps into */
+__thread int eh_dispatching;
 /* the record and CPU a resume goes to, read back by the resumed function right after its
    __builtin_setjmp returns: Clang (Zig's Windows builds) doesn't keep its locals c and eh_ across
    the longjmp, GCC happens to (from penguins-native) */
@@ -66,6 +71,7 @@ static int eh_resume(CPU *c, uint32_t target, uint32_t esp, uint32_t ebp)
                 c->ebp = ebp;
                 eh_resumed = f;
                 eh_resumed_c = c;
+                eh_dispatching = 0;      /* (the dispatch it came from is abandoned) */
                 __builtin_longjmp(f->jb, 1);
             }
     }
@@ -76,6 +82,14 @@ static int eh_resume(CPU *c, uint32_t target, uint32_t esp, uint32_t ebp)
 int eh_resume_at(CPU *c, uint32_t target, uint32_t esp, uint32_t ebp)
 {
     return eh_resume(c, target, esp, ebp);
+}
+
+/* icall, while an exception is dispatched, of a place a live frame goes on at: an __except block
+   (also a translated function) that a handler jumps into with the frame's ebp; the block sets esp
+   itself. 0 when it isn't one. */
+int eh_resume_place(CPU *c, uint32_t target)
+{
+    return eh_resume(c, target, c->esp, c->ebp);
 }
 
 /* icall of code that is no function: an __except block that _except_handler3 calls (ebp is
@@ -135,10 +149,15 @@ static void make_record(CPU *c, uint32_t at, uint32_t code, uint32_t flags, uint
     W32(ctx + 0xc4, c->esp);
 }
 
+static uint32_t raise_exception(CPU *c, uint32_t code, uint32_t flags, uint32_t n, uint32_t args, uint32_t ip);
 API(KERNEL32, RaiseException, 4)
 {
-    uint32_t code = ARG(0), flags = ARG(1) & EXCEPTION_NONCONTINUABLE, n = ARG(2), args = ARG(3);
-    uint32_t ip = R32(c->esp);
+    return raise_exception(c, ARG(0), ARG(1) & EXCEPTION_NONCONTINUABLE, ARG(2), ARG(3), R32(c->esp));
+}
+
+/* RaiseException's work: ip is where it was raised from (the return address) */
+static uint32_t raise_exception(CPU *c, uint32_t code, uint32_t flags, uint32_t n, uint32_t args, uint32_t ip)
+{
     if (code == 0x406d1388u) {
         /* MSVC's "set thread name" for a debugger (args: type 0x1000, name, thread id, flags):
            with no debugger the program's own __except takes it; it simply continues here */
@@ -160,7 +179,9 @@ API(KERNEL32, RaiseException, 4)
     make_record(c, at, code, flags, n, args, ip);
     c->esp = at - 64;                    /* the handlers run below the record */
     for (uint32_t reg = R32(c->fs_base); reg != 0xffffffffu && reg; reg = R32(reg)) {
+        eh_dispatching++;
         uint32_t r = guest_call(c, R32(reg + 4), 4, at, reg, ctx, disp);
+        eh_dispatching--;
         if (r == 0) {                    /* ExceptionContinueExecution */
             if (flags & EXCEPTION_NONCONTINUABLE)
                 fatal("a handler continued a non-continuable exception %08x", code);
@@ -171,6 +192,41 @@ API(KERNEL32, RaiseException, 4)
     if (code == 0xe06d7363u && n >= 3)
         fatal("the program threw a C++ exception of type %s that nothing catches", cxx_type(args));
     fatal("exception %08x from %08x that nothing handles", code, ip);
+}
+
+/* A TEST THROW, for checking that a port's caught C++ exceptions go on (Nitronic Rush's request): a
+   port names a function that runs inside a try block in its build config, HOOKS = {addr:
+   'test_throw'}, and with <PORT_ENV>_TEST_THROW=N the Nth call of it (1: the first) throws a C++
+   exception of type int from its first instruction, as `throw 0;` as its first statement would.
+   A catch(...) or catch(int) around the call takes it; nothing catching it ends the run (fatal),
+   which says the function wasn't inside a try. Without the variable the function runs as it is. */
+int hook_test_throw(CPU *c)
+{
+    static int nth = -1, calls;
+    static uint32_t blk;
+    if (nth < 0) {
+        const char *e = port_getenv("TEST_THROW");
+        nth = e ? atoi(e) : 0;
+    }
+    if (!nth || ++calls != nth)
+        return 0;
+    if (!blk) {
+        /* in program memory: the thrown int, its ThrowInfo {attributes, unwind, forward compat,
+           catchable types}, the array {1, type}, the CatchableType {simple, type descriptor,
+           displacement 0 -1 0, size 4, no copy} and the TypeDescriptor {vtable, spare, ".H"} */
+        blk = galloc(128);
+        uint32_t obj = blk, ti = blk + 8, cta = blk + 24, ct = blk + 32, td = blk + 64, args = blk + 96;
+        W32(obj, 0);
+        W32(ti, 0); W32(ti + 4, 0); W32(ti + 8, 0); W32(ti + 12, cta);
+        W32(cta, 1); W32(cta + 4, ct);
+        W32(ct, 1); W32(ct + 4, td); W32(ct + 8, 0); W32(ct + 12, 0xffffffffu); W32(ct + 16, 0);
+        W32(ct + 20, 4); W32(ct + 24, 0);
+        W32(td, 0); W32(td + 4, 0); W8(td + 8, '.'); W8(td + 9, 'H'); W8(td + 10, 0);
+        W32(args, 0x19930520u); W32(args + 4, obj); W32(args + 8, ti);
+    }
+    LOG(LOG_ALWAYS, "test throw: call %d of the function at the hook (return address %08x)", calls, R32(c->esp));
+    raise_exception(c, 0xe06d7363u, EXCEPTION_NONCONTINUABLE, 3, blk + 96, R32(c->esp));
+    return 1;
 }
 
 /* RtlUnwind(target frame, target ip, record, return value): every registration above the

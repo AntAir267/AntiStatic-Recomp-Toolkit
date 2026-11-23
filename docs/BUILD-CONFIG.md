@@ -36,7 +36,7 @@ Every key but `NAME` and `MODULES` (or `SHA256`) is optional.
 
 | Key | Form | Meaning |
 | --- | --- | --- |
-| `HOOKS` | `{addr: 'name'}` | The runtime's `hook_name(c)` runs at the function's entry; it can call `F_<addr>_orig(c)` and return 1 to replace the function. |
+| `HOOKS` | `{addr: 'name'}` | The runtime's `hook_name(c)` runs at the function's entry; it can call `F_<addr>_orig(c)` and return 1 to replace the function. The toolkit's own `test_throw` (runtime/win32/eh.c) throws a C++ `int` from the function's Nth call when `<PORT_ENV>_TEST_THROW=N` is set: name a function called inside a try block to check that a catch goes on. |
 | `INLINE` | `{addr: 'ftol'}` | Calls to a known runtime helper (MSVC's `_ftol`) done in place. |
 | `TABLES` | `[dict(name=, base=, entry=, count=, funcs=None, limits=[])]` | Fixed-size tables the runtime may move and enlarge: the code reads them through `reloc_<name>`, and the `limits` instructions compare against `limit_<name>`. |
 | `CONSTS` | `{name: dict(value=, insns=[...])}` | Immediate values the runtime may change (`rc_<name>`), such as a resolution. |

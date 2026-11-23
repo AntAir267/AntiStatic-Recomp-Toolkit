@@ -1543,7 +1543,7 @@ class FuncGen:
             E('SAVE(); nonlocal_jump(c, %s, %s); return;' % (hx(a), self.rd(op)))
             return True
         # indirect tail call
-        E('{ uint32_t t = %s; SAVE(); icall(c, t); return; }' % self.rd(op))
+        E('{ uint32_t t = %s; SAVE(); ijump(c, t); return; }' % self.rd(op))
         return True
 
     def call(self, i):
