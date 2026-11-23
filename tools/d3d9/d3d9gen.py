@@ -32,6 +32,8 @@ SPECIAL = {
     '*::QueryInterface', '*::AddRef', '*::Release',
     'IDirect3D9::CreateDevice', 'IDirect3D9::GetAdapterMonitor', 'IDirect3D9::RegisterSoftwareDevice',
     'IDirect3D9::GetAdapterModeCount', 'IDirect3D9::EnumAdapterModes', 'IDirect3D9::GetAdapterDisplayMode',
+    'IDirect3D9::GetAdapterIdentifier', 'IDirect3DDevice9::GetAvailableTextureMem',
+    'IDirect3D9::GetDeviceCaps', 'IDirect3DDevice9::GetDeviceCaps',
     'IDirect3DDevice9::Reset', 'IDirect3DDevice9::CreateAdditionalSwapChain',
     'IDirect3DDevice9::GetCreationParameters', 'IDirect3DDevice9::Present',
     'IDirect3DDevice9::GetNPatchMode',

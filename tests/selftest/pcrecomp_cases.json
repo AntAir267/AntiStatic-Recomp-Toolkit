@@ -1554,7 +1554,7 @@
    "source": "frndint.up"
   },
   "case_pc_fsin_c2": {
-   "emulator_gap": "Unicorn leaves C1 clear after fsin; a real x87 sets it when the result was rounded up (Intel SDM, FSIN: C1 \"set if result was rounded up\")",
+   "emulator_gap": "Unicorn leaves C1 clear after fsin; a real x87 sets it when the result was rounded up (Intel SDM, FSIN: C1 \"set if result was rounded up\"). With PORT_X87_PORTABLE (the default since v0.2.46) the toolkit leaves C1 clear too, so the case matches",
    "known": null,
    "mask": 1237,
    "mem": {

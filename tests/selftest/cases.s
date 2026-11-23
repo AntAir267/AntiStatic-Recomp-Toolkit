@@ -643,6 +643,90 @@ case_mmx:
         emms
         ret
 
+# fcmov after each kind of flag-setting instruction (xboxrecomp f4e42be: its FCMOV lost the carry);
+# the doubles at +0x100 and +0x108 are the two choices, the integers set the flags
+case_fcmov:
+        fld qword ptr [S + 0x100]
+        fld qword ptr [S + 0x108]       # st0 = b, st1 = a
+        cmp eax, ebx
+        fcmovb st(0), st(1)
+        fst qword ptr [R + 0]
+        cmp ecx, edx
+        fcmovnbe st(0), st(1)
+        fst qword ptr [R + 8]
+        add eax, ebx                    # a carry from an add
+        fld qword ptr [S + 0x110]
+        fcmovnb st(0), st(2)
+        fstp qword ptr [R + 16]
+        sub esi, edi                    # from a sub, then ZF too
+        fld qword ptr [S + 0x118]
+        fcmovbe st(0), st(2)
+        fstp qword ptr [R + 24]
+        cmp esi, esi
+        fld qword ptr [S + 0x120]
+        fcmove st(0), st(1)
+        fstp qword ptr [R + 32]
+        test ecx, ecx
+        fld qword ptr [S + 0x128]
+        fcmovne st(0), st(2)
+        fstp qword ptr [R + 40]
+        test dl, 3                      # parity of the low byte
+        fld qword ptr [S + 0x130]
+        fcmovu st(0), st(1)
+        fstp qword ptr [R + 48]
+        test bl, 5
+        fld qword ptr [S + 0x138]
+        fcmovnu st(0), st(2)
+        fstp qword ptr [R + 56]
+        fstp qword ptr [R + 64]
+        fstp qword ptr [R + 72]
+        ret
+
+# the SSE bitwise ops on whole registers and movq on xmm (xboxrecomp 27ce783: they vanished there)
+case_sse_logic:
+        movdqu xmm0, [S + 0]
+        movdqu xmm1, [S + 16]
+        movdqu xmm2, xmm0
+        pand xmm2, xmm1
+        movdqu xmm3, xmm0
+        pandn xmm3, xmm1
+        movdqu xmm4, xmm0
+        por xmm4, [S + 32]
+        movdqu xmm5, xmm1
+        pxor xmm5, xmm0
+        movups xmm6, [S + 48]
+        andnps xmm6, xmm0
+        orps xmm6, xmm3
+        xorps xmm6, xmm2
+        andps xmm6, xmm4
+        movq xmm7, xmm5                 # the low quadword, the high one cleared
+        movdqu [R + 0], xmm2
+        movdqu [R + 16], xmm3
+        movdqu [R + 32], xmm4
+        movdqu [R + 48], xmm5
+        movdqu [R + 64], xmm6
+        movdqu [R + 80], xmm7
+        movq xmm0, qword ptr [S + 64]
+        movq qword ptr [R + 96], xmm1
+        movdqu [R + 104], xmm0
+        ret
+
+# fincstp / fdecstp move the x87 stack top without touching the registers (xboxrecomp 27ce783)
+case_x87_stackptr:
+        fld qword ptr [S + 0x100]
+        fld qword ptr [S + 0x108]       # st0 = b, st1 = a
+        fdecstp
+        fincstp                         # back: st0 = b
+        fstp qword ptr [R + 0]
+        fld qword ptr [S + 0x110]       # st0 = c, st1 = a
+        fincstp                         # st0 = a (c now st7, still full)
+        fstp qword ptr [R + 8]          # a; the stack is empty
+        fdecstp
+        fdecstp                         # st0 = c again
+        fstp qword ptr [R + 16]
+        fincstp                         # balanced: as many pushes as pops overall
+        ret
+
 # ---------------------------------------------------------------- x87 under every precision and rounding mode
 # (SwARc's x87 oracle idea: the same arithmetic under each control word, 80-bit results compared bit
 # for bit). The generated C computes on the host x87 with the program's control word, so the

@@ -18,7 +18,9 @@
 #            sources outside the rewrites, the stack fixes, a build id...): A is saved under an id
 #            of all of them plus the command and the route's environment (DIR/a-<id>/, the last
 #            four kept), and reused while it is the same (the machine's name and the variables
-#            that pick the graphics driver are part of it too). --fresh runs it again.
+#            that pick the graphics driver are part of it too, and the game program the command
+#            starts: give its real program as an --id when the command is a wrapper script).
+#            --fresh runs it again.
 # --lock     a lock file, so checks run one at a time; default: work/ab.lock in the main checkout
 #            of the git repository the current folder is in (shared by all its worktrees); outside
 #            one (or in a copy git can't read), ~/.cache/antistatic/ab.lock; "none" for no lock
@@ -105,6 +107,9 @@ if [ -n "$fncheck" ]; then    # the per-function check: one run, the report in $
 fi
 id=$( { for f in ${ids[@]+"${ids[@]}"}; do cat "$f"; done
         echo "${cmd[*]} $frames $every"; env | grep "^${env}_" | grep -v "^$off_var=" | sort
+        # the game program itself, so a new build never reuses an old build's A (Nitronic Rush's
+        # false "differ" with an --id list that left it out)
+        prog=$(command -v -- "${cmd[0]}" 2>/dev/null) && [ -f "$prog" ] && sha1sum < "$prog"
         # the machine and the graphics driver: their device data is in game memory, so the
         # translation's hashes differ between them (NVIDIA against lavapipe from frame 10)
         uname -n

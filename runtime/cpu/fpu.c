@@ -141,11 +141,11 @@ void fpu_ldconst(CPU *c, int which)
     FPUSH(v);
 }
 
-/* PORT_X87_PORTABLE 1: the transcendentals below by basic arithmetic (x87soft.h), the same on
-   every x86 CPU, instead of the host's instructions (bit for bit the original's on that CPU, but
-   Intel's and AMD's differ in the last bits). Off by default: recorded runs keep their values. */
+/* PORT_X87_PORTABLE (1 unless the port says 0): the transcendentals below by basic arithmetic
+   (x87soft.h), the same on every x86 CPU. 0: the host's own instructions (bit for bit the original's
+   on that CPU, but Intel's and AMD's differ in the last bits), e.g. for a timing comparison. */
 #ifndef PORT_X87_PORTABLE
-#define PORT_X87_PORTABLE 0
+#define PORT_X87_PORTABLE 1
 #endif
 #if PORT_X87_PORTABLE
 #include "x87soft.h"

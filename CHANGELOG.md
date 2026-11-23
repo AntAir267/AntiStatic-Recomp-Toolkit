@@ -3,6 +3,39 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.46 (2026-11-23)
+
+Test runs give the same results on every PC: recorded routes no longer depend on the CPU's maker or
+the graphics card. **Ports record their baselines again once at this move** (docs/MOVING.md).
+- **`PORT_X87_PORTABLE` is on by default** (v0.2.45's x87soft.h: fsin, fcos, fsincos, fptan, fpatan,
+  f2xm1, fyl2x, fyl2xp1 from basic arithmetic). `PORT_X87_PORTABLE 0` keeps the host's instructions
+  (timing comparisons).
+- **`PORT_SSE_PORTABLE`, on by default** (runtime/cpu/sse_portable.h): rcpss, rcpps, rsqrtss and
+  rsqrtps exact, the same on every x86 CPU. The instructions are 12-bit approximations whose tables
+  differ between Intel and AMD (L.A. Rush's routes split at frame 204). The exact result is within the
+  instructions' own bound, and their special cases are kept (NaNs, zeros and denormals, infinities,
+  tiny results flushed, negative roots). cpu.h redirects `_mm_rcp_ss`, `_mm_rcp_ps`, `_mm_rsqrt_ss`
+  and `_mm_rsqrt_ps`, so generated code and rewrites that use them both get these; `cpu_rcp1` and
+  `cpu_rsqrt1` are the scalar forms for a reference build. cpu.h now reads the port's port.h: make
+  generated objects depend on it and on runtime/cpu/*.h.
+- **A test card under `--test`** (D3D9): option `test_card = nvidia` (default) | `amd` | `intel` |
+  `real`, and `test_vram = MB` (default 2047). GetAdapterIdentifier, GetAvailableTextureMem and
+  GetDeviceCaps' MaxPointSize (the one capability DXVK takes from the Vulkan driver) answer as that
+  card, and DXVK is given its vendor for its own vendor-dependent answers. Each card is the same on
+  every PC, so a game's own per-vendor path can be recorded and checked on any PC. Outside `--test`,
+  always the PC's own card.
+- GetAdapterIdentifier copies the program's 1100-byte structure: DXVK wrote the host's 1104 bytes into it.
+- Measured on L.A. Rush (game-thread CPU): the x87 setting +4-6%, the SSE one +1-2%, about 0.2 ms a
+  frame together; mean frame times unchanged within noise. Proof: L.A. Rush byte-identical between an
+  Intel and an AMD PC for 600 frames on two routes; Nitronic Rush's AMD laptop matching an NVIDIA PC
+  on all five routes where it differed from frame 100 (a later split, from frame 1500, is colours
+  read back from the GPU, which only a software Vulkan driver makes the same).
+- Self-test: cases for fcmov after each kind of flag-setting instruction, the SSE bitwise ops and movq
+  on xmm, and fincstp / fdecstp (from xboxrecomp v0.18.0's lifter fixes; all match).
+- tools/rewrite/ab.sh: the game program the command starts is part of A's cache id, so a new build
+  never reuses an old build's translation run (Nitronic Rush's false "differ").
+- Regenerate the D3D9 bridge (tools/d3d9/d3d9gen.py changed); the game's C doesn't change.
+
 ## v0.2.45 (2026-11-18)
 
 - **`PORT_X87_PORTABLE 1`: the x87 transcendentals give the same results on every x86 CPU.**

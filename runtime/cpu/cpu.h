@@ -9,6 +9,13 @@
 #include <stdint.h>
 #include <string.h>
 #include <immintrin.h>
+#if __has_include("port.h")
+#include "port.h"                       /* (PORT_SSE_PORTABLE; fpu.c reads its settings the same way) */
+#endif
+#ifndef PORT_SSE_PORTABLE
+#define PORT_SSE_PORTABLE 1
+#endif
+#include "sse_portable.h"
 
 typedef long double f80;
 

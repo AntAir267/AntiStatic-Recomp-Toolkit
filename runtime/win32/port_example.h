@@ -100,8 +100,11 @@
 /* #define PORT_CPUID_SIGNATURE 0x686 */       /* CPUID leaf 1's eax (family, model, stepping) */
 /* #define PORT_CPUID_MAX_LEAF 2 */
 /* #define PORT_CPUID_FEATURES 0x0383f9ffu */   /* CPUID leaf 1's edx */
-/* #define PORT_X87_PORTABLE 1 */   /* x87 sin/cos/tan/atan/log/2^x by basic arithmetic: the same results on
-                                       every x86 CPU (the host's instructions differ between Intel and AMD) */
+/* #define PORT_X87_PORTABLE 0 */   /* the host's own x87 sin/cos/tan/atan/log/2^x instead of the toolkit's
+                                       (the default, 1: the same results on every x86 CPU; Intel's and
+                                       AMD's instructions differ) */
+/* #define PORT_SSE_PORTABLE 0 */   /* the host's own rcpss/rcpps/rsqrtss/rsqrtps instead of exact ones (the
+                                       default, 1: the same on every x86 CPU; Intel's and AMD's tables differ) */
 /* #define PORT_TSC_HZ 10000000.0 */           /* RDTSC's rate */
 /* #define PORT_QPC_HZ 10000000.0 */           /* QueryPerformanceCounter's rate */
 /* #define PORT_MEMORY_MB 1024 */              /* GlobalMemoryStatus' physical memory */

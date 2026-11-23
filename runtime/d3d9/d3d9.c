@@ -440,6 +440,46 @@ static int shadow_filter_opt(void)
 }
 
 /* option anisotropic = off | 2 | 4 | 8 | 16: the level, or -1 (the game's own) */
+/* The card the program is told it has under --test (sp_IDirect3D9_GetAdapterIdentifier, below):
+   option test_card = nvidia (the default) | amd | intel | real, and test_vram = MB (default 2047).
+   Each but real is the same on every PC, so a game that does something of its own for a vendor can
+   have that tested, and recorded, on any PC; real is the PC's own card (runs that can't be compared
+   between PCs). */
+/* max_point: D3DCAPS9.MaxPointSize, which DXVK takes from the Vulkan driver's pointSizeRange (the one
+   capability that comes from the card: Nitronic Rush kept it, 8191.875 on RADV, 2047.9375 on NVIDIA's
+   driver [verified: its memory at frame 100]); each test card gives its vendor's driver's value
+   (Intel's: ANV's 255.875 [guess: from Mesa's limits, not measured]) */
+typedef struct { const char *name; uint32_t vendor, device; const char *pci_vendor, *pci_device, *desc, *driver; float max_point; } TestCard;
+static const TestCard test_cards[] = {
+    {"nvidia", 0x10de, 0x2487, "10DE", "2487", "NVIDIA GeForce RTX 3060", "nvd3dum.dll", 2047.9375f},
+    {"amd", 0x1002, 0x73df, "1002", "73DF", "AMD Radeon RX 6700 XT", "aticfx32.dll", 8191.875f},
+    {"intel", 0x8086, 0x3e92, "8086", "3E92", "Intel(R) UHD Graphics 630", "igdumd32.dll", 255.875f},
+};
+/* the test card, or NULL: not --test, or test_card = real */
+static const TestCard *test_card(void)
+{
+    static const TestCard *card;
+    static int known;
+    if (!deterministic)
+        return NULL;
+    if (!known) {
+        const char *v = option_str("test_card", "nvidia");
+        known = 1;
+        for (size_t i = 0; i < sizeof test_cards / sizeof *test_cards; i++)
+            if (!strcasecmp(v, test_cards[i].name))
+                card = &test_cards[i];
+        if (!card && strcasecmp(v, "real"))
+            fatal("option test_card = %s: nvidia, amd, intel or real", v);
+        LOG(LOG_ALWAYS, "test card: %s", card ? card->desc : "the PC's own");
+    }
+    return card;
+}
+static uint32_t test_vram_bytes(void)
+{
+    long mb = atol(option_str("test_vram", "2047"));
+    return mb < 1 ? 1u << 20 : mb > 4095 ? 4095u << 20 : (uint32_t)mb << 20;
+}
+
 static int anisotropic_opt(void)
 {
     int an = atoi(option_str("anisotropic", PORT_D3D9_ANISOTROPIC));
@@ -504,8 +544,14 @@ API(D3D9, Direct3DCreate9, 1)
             const char *more = port_d3d9_dxvk_config();
             /* (a hidden window, --hidden, is never shown: presenting without waiting for the
                screen keeps a compositor that never draws it from holding the frame up) */
-            snprintf(conf, sizeof conf, "d3d9.samplerAnisotropy = %d; d3d9.shadowFilter = %d;%s%s%s", an, sf,
-                     hidden_window ? " d3d9.presentInterval = 0;" : "", more ? " " : "", more ? more : "");
+            const TestCard *tc = test_card();
+            char card[200] = "";
+            if (tc)                 /* (DXVK's own answers that follow the vendor: the same card) */
+                snprintf(card, sizeof card, " d3d9.customVendorId = %s; d3d9.customDeviceId = %s;"
+                         " d3d9.customDeviceDesc = \"%s\";", tc->pci_vendor, tc->pci_device, tc->desc);
+            snprintf(conf, sizeof conf, "d3d9.samplerAnisotropy = %d; d3d9.shadowFilter = %d;%s%s%s%s", an, sf,
+                     hidden_window ? " d3d9.presentInterval = 0;" : "", card,
+                     more ? " " : "", more ? more : "");
             setenv("DXVK_CONFIG", conf, 0);
         }
         dxvk = dlopen(path, RTLD_NOW | RTLD_LOCAL);
@@ -583,6 +629,78 @@ HOSTFN(sp_IDirect3D9_EnumAdapterModes, 5)
         self, (UINT)ARG(1), (D3DFORMAT)ARG(2), (UINT)ARG(3), (D3DDISPLAYMODE *)(uintptr_t)ARG(4));
     if ((int32_t)r < 0 && r != 0x8876086au) LOG(LOG_D3D, "IDirect3D9::EnumAdapterModes -> %08x", r);
     return r;
+}
+
+/* The graphics card as the program sees it. Under --test the test card (test_card, above: the
+   same on every PC; 2047 MB of texture memory by default, as L.A. Rush's and Enter the Matrix's
+   renderers answer), so a recorded run doesn't depend on the PC's card: Nitronic Rush kept a float
+   that was 8191.9 on an AMD card and 2047.9 on two GeForces. The program's structure is 1100
+   bytes and the host's 1104 (padding): DXVK fills a host copy and the program gets its 1100. */
+HOSTFN(sp_IDirect3D9_GetAdapterIdentifier, 4)
+{
+    uint32_t out = ARG(3);
+    if (!out)
+        return D3DERR_INVALIDCALL;
+    D3DADAPTER_IDENTIFIER9 id;
+    memset(&id, 0, sizeof id);
+    uint32_t r;
+    const TestCard *tc = test_card();
+    if (tc) {
+        if (ARG(1) != 0)
+            return D3DERR_INVALIDCALL;
+        snprintf(id.Driver, sizeof id.Driver, "%s", tc->driver);
+        snprintf(id.Description, sizeof id.Description, "%s", tc->desc);
+        snprintf(id.DeviceName, sizeof id.DeviceName, "\\\\.\\DISPLAY1");
+        id.DriverVersion.QuadPart = INT64_MAX;
+        id.VendorId = tc->vendor;
+        id.DeviceId = tc->device;
+        static const uint8_t guid[16] = {0x41, 0x6e, 0x74, 0x69, 0x53, 0x74, 0x61, 0x74,
+                                         0x69, 0x63, 0x20, 0x74, 0x65, 0x73, 0x74, 0x21};
+        memcpy(&id.DeviceIdentifier, guid, 16);
+        r = D3D_OK;
+    } else {
+        void *self = d3d_host(ARG(0));
+        r = (uint32_t)((HRESULT (*)(void *, UINT, DWORD, D3DADAPTER_IDENTIFIER9 *))VT(self)[5])(self, (UINT)ARG(1),
+            (DWORD)ARG(2), &id);
+        if ((int32_t)r < 0) {
+            LOG(LOG_D3D, "IDirect3D9::GetAdapterIdentifier -> %08x", r);
+            return r;
+        }
+    }
+    memcpy(gptr(out), &id, 1100);
+    return r;
+}
+/* the capabilities: DXVK's, with the card's own one (MaxPointSize) the test card's under --test (the
+   structure is 304 bytes on both sides, all 4-byte fields) */
+static void caps_test(uint32_t caps, uint32_t r)
+{
+    const TestCard *tc = test_card();
+    if (tc && caps && (int32_t)r >= 0)
+        ((D3DCAPS9 *)gptr(caps))->MaxPointSize = tc->max_point;
+}
+HOSTFN(sp_IDirect3D9_GetDeviceCaps, 4)
+{
+    void *self = d3d_host(ARG(0));
+    uint32_t r = (uint32_t)((HRESULT (*)(void *, UINT, D3DDEVTYPE, D3DCAPS9 *))VT(self)[14])(self, (UINT)ARG(1),
+        (D3DDEVTYPE)ARG(2), (D3DCAPS9 *)(uintptr_t)ARG(3));
+    if ((int32_t)r < 0 && r != 0x8876086au) LOG(LOG_D3D, "IDirect3D9::GetDeviceCaps -> %08x", r);
+    caps_test(ARG(3), r);
+    return r;
+}
+HOSTFN(sp_IDirect3DDevice9_GetDeviceCaps, 2)
+{
+    void *self = d3d_host(ARG(0));
+    uint32_t r = (uint32_t)((HRESULT (*)(void *, D3DCAPS9 *))VT(self)[7])(self, (D3DCAPS9 *)(uintptr_t)ARG(1));
+    if ((int32_t)r < 0 && r != 0x8876086au) LOG(LOG_D3D, "IDirect3DDevice9::GetDeviceCaps -> %08x", r);
+    caps_test(ARG(1), r);
+    return r;
+}
+HOSTFN(sp_IDirect3DDevice9_GetAvailableTextureMem, 1)
+{
+    if (test_card())
+        return test_vram_bytes();
+    void *self = d3d_host(ARG(0));
+    return (uint32_t)((UINT (*)(void *))VT(self)[4])(self);
 }
 
 HOSTFN(sp_IDirect3D9_GetAdapterDisplayMode, 3)

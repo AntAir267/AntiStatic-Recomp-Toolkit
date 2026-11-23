@@ -97,6 +97,12 @@ while it runs inside a Direct3D call.
 
 - The display modes under `--test` are a fixed list (640x480 to 2560x1600, 60 Hz) and the desktop
   1920x1080, so runs don't depend on the monitors plugged in; otherwise DXVK's.
+- The graphics card under `--test` is a test card, the same on every PC (GetAdapterIdentifier,
+  GetAvailableTextureMem, GetDeviceCaps' MaxPointSize, and DXVK's own vendor-dependent answers): option `test_card = nvidia`
+  (the default: an RTX 3060's identity), `amd` (an RX 6700 XT's), `intel` (a UHD 630's) or `real`
+  (the PC's own; runs not comparable between PCs), and `test_vram = MB` (default 2047). A game that
+  does something of its own for a vendor gets a route per card, each recorded and checked on any PC
+  (`--option "test_card = amd"`). Outside `--test`, always the PC's own card.
 - Full screen becomes a window of the back buffer's size (the desktop mode is never changed); the
   host window is resized to the back buffer at CreateDevice / Reset.
 - CreateDevice sets the program's x87 control word to single precision unless the game asks for

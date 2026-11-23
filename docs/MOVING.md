@@ -91,6 +91,22 @@ Behaviour the toolkit has that most ports' copies don't (each can move a hash):
   the game's; `PORT_KEEP_EXIT_CODE` keeps it everywhere)
 - (v0.2.32) a thread created after another finished reuses its stack, TEB and TLS blocks (their
   addresses), and DuplicateHandle returns a new handle: either can move hashes in a run that does it
+- (v0.2.46) the x87 transcendentals (fsin, fcos, fsincos, fptan, fpatan, f2xm1, fyl2x, fyl2xp1) are
+  computed by the toolkit, the same on every x86 CPU, not by the host's x87 (Intel's and AMD's differ
+  in the last bits, so runs differed between PCs). Any game, C runtime or D3DX that uses them moves
+  its hashes once: record baselines again, once, at this move; they then hold on every PC.
+  `PORT_X87_PORTABLE 0` keeps the host's instructions (timing comparisons). Likewise the SSE
+  reciprocal approximations (rcpss, rcpps, rsqrtss, rsqrtps) are exact divisions and square roots,
+  the same on every CPU, in the generated code and in rewrites that use the intrinsics
+  (`_mm_rcp_ss` and the rest; `PORT_SSE_PORTABLE 0` keeps the host's)
+  Since v0.2.46 cpu.h reads the port's port.h (for these settings) and includes sse_portable.h:
+  make the generated objects depend on port.h and runtime/cpu/*.h, or a changed setting leaves stale
+  objects built with the old one (L.A. Rush's Makefile has the rule)
+- (v0.2.46) D3D9 under `--test`: GetAdapterIdentifier and GetAvailableTextureMem give a test card, the
+  same on every PC (`test_card = nvidia` by default: an RTX 3060's identity, 2047 MB; `amd`, `intel`,
+  `real`; `test_vram = MB`), and DXVK is told the same vendor; a game that keeps anything from them
+  moves its hashes once (the same re-record). If the game branches on the vendor, record a route per
+  test card (runtime/d3d9/README.md)
 - outside test runs only: `Sleep(0)` polling and clock-spin waits sleep instead of spinning; the
   frame limiter sleeps to its deadline
 

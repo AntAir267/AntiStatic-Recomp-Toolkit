@@ -41,7 +41,8 @@ FLAG_BITS = {'CF': 0x1, 'PF': 0x4, 'AF': 0x10, 'ZF': 0x40, 'SF': 0x80, 'DF': 0x4
 # real x87): reported, not counted as failures. Checked by hand against Intel's manual.
 EMULATOR_GAPS = {
     'fsin.c2': 'Unicorn leaves C1 clear after fsin; a real x87 sets it when the result was rounded up '
-               '(Intel SDM, FSIN: C1 "set if result was rounded up")',
+               '(Intel SDM, FSIN: C1 "set if result was rounded up"). With PORT_X87_PORTABLE (the default '
+               'since v0.2.46) the toolkit leaves C1 clear too, so the case matches',
 }
 
 md = Cs(CS_ARCH_X86, CS_MODE_32)
