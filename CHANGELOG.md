@@ -3,6 +3,15 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.48 (2026-11-23)
+
+- **`HOOKS = {addr: 'test_throw'}` links now** (Nitronic Rush found it couldn't): a hook is the
+  generated table's pointer, which the runtime sets; v0.2.47 defined a function of the same name.
+  The function is `eh_test_throw(CPU *c)` (runtime.h), which eh_init puts in `hook_test_throw`, and
+  which a port's own hook may call (throwing only from one caller, say). The stub game now hooks its
+  throw helper with it and runs once with `STUB_TEST_THROW=1`: the throw is caught and gone on from.
+- No regenerate (a port that already moved to v0.2.47 needn't translate again).
+
 ## v0.2.47 (2026-11-23)
 
 **Caught exceptions go on in Visual C++ 2005/2008 programs** (Nitronic Rush's MSVCR90; the item open

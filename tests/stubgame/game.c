@@ -207,7 +207,7 @@ __asm__(".intel_syntax noprefix\n"
         "_eh_cxx_handlers:\n  .long 0, 0, 0, _eh_cxx_catch\n"
         "_eh_seh4_table:\n  .long -2, 0, -0x24, 0\n  .long -2, _eh_seh4_filter, _eh_seh4_except\n"
         ".text\n.att_syntax\n"
-        ".section .drectve\n.ascii \" -export:eh_cxx_handler\"\n.text\n");
+        ".section .drectve\n.ascii \" -export:eh_cxx_handler -export:eh_throw1\"\n.text\n");
 
 /* DIRECTSOUND, the way games use it: a buffer filled by Lock, played looping, its play position
    read back while time passes (the game's clock), stopped, played once to its end, faster.

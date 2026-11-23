@@ -161,6 +161,9 @@ CPU *current_cpu(void);
 void crash_line(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void port_crash_report(int guest_thread);
 int log_fd(void);
+/* a C++ int thrown from the calling function's first instruction on its Nth call when
+   <PORT_ENV>_TEST_THROW=N (eh.c; HOOKS {addr: 'test_throw'} does it for a function); 0: not thrown */
+int eh_test_throw(CPU *c);
 uint32_t current_thread_id(void);
 void set_last_error(uint32_t e);
 uint32_t get_last_error(void);

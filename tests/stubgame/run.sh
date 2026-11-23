@@ -45,7 +45,11 @@ open(sys.argv[2] + '/gen/rewrite_addrs.h', 'w').write(
     '#define STACKFIX_MIX(n) STACKFIX(%x, n, hook_dc_%x)\n#define MIX_ORIG F_%08x_orig\n'
     % (rotl, mix, mix, mix, mix, mix))
 # the port's own hook on stub_mix, with the rewrite inside it (INNER_HOOKS)
-open(sys.argv[2] + '/hooks_cfg.py', 'w').write('HOOKS = {0x%x: "mix_outer"}\nINNER_HOOKS = True\n' % mix)
+# and the toolkit's test throw on eh_throw1 (game.c), which eh_cxx calls inside its try block
+th = m.export('eh_throw1')
+assert th, sorted(m.exports)
+open(sys.argv[2] + '/hooks_cfg.py', 'w').write('HOOKS = {0x%x: "mix_outer", 0x%x: "test_throw"}\nINNER_HOOKS = True\n'
+                                             % (mix, th))
 open(sys.argv[2] + '/fncheck.spec', 'w').write(open('tests/stubgame/fncheck.spec').read().replace('@MIX@', '%x' % mix))
 # the game's own setjmp / longjmp (game.c): the build config's SETJMP / LONGJMP
 sj, lj = m.export('my_setjmp'), m.export('my_longjmp')
@@ -93,6 +97,19 @@ for mode in on off; do
         fail=1
     fi
 done
+# The test throw (eh.c eh_test_throw, HOOKS 'test_throw'): eh_throw1's 1st call throws a C++ int from
+# its first instruction instead; eh_cxx's catch takes it, so the result is the same
+rm -f $B/user/result.txt
+set +e
+STUB_TEST_THROW=1 $B/stub --game "$PWD/$B/game" --user "$PWD/$B/user" --test --hidden --logfile "$PWD/$B/run_throw.log" >/dev/null 2>&1
+code=$?
+set -e
+if [ $code = 42 ] && cmp -s $B/user/result.txt tests/stubgame/expected.txt && grep -q "test throw: call 1" $B/run_throw.log; then
+    echo "stub game (test throw): ok, caught and gone on from"
+else
+    echo "stub game (test throw): FAILED (exit $code; $B/run_throw.log)"
+    fail=1
+fi
 # The per-function check (runtime/rewrite/fncheck.c) through the A/B script: stub_mix's rewrite
 # against its translation must be the same on every input of fncheck.spec, and the deliberate bug
 # (STUB_MIX_MUTANT=1, an input the game never gives) must show as DIFFER

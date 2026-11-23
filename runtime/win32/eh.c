@@ -199,8 +199,10 @@ static uint32_t raise_exception(CPU *c, uint32_t code, uint32_t flags, uint32_t 
    'test_throw'}, and with <PORT_ENV>_TEST_THROW=N the Nth call of it (1: the first) throws a C++
    exception of type int from its first instruction, as `throw 0;` as its first statement would.
    A catch(...) or catch(int) around the call takes it; nothing catching it ends the run (fatal),
-   which says the function wasn't inside a try. Without the variable the function runs as it is. */
-int hook_test_throw(CPU *c)
+   which says the function wasn't inside a try. Without the variable the function runs as it is.
+   The hook is the generated table's pointer (eh_init sets it); eh_test_throw is the function, which a
+   port's own hook may call too (Nitronic Rush throws only from one caller of operator new). */
+int eh_test_throw(CPU *c)
 {
     static int nth = -1, calls;
     static uint32_t blk;
@@ -254,9 +256,11 @@ API(KERNEL32, RtlUnwind, 4)
     return rv;
 }
 
+extern int (*hook_test_throw)(CPU *c) __attribute__((weak));
 void eh_init(void)
 {
     if (&hook_jump_to_continuation) hook_jump_to_continuation = jump_to_continuation_hook;
+    if (&hook_test_throw) hook_test_throw = eh_test_throw;
 }
 
 /* ------------------------------------------------------------------ setjmp / longjmp
