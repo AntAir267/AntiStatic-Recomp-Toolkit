@@ -3,6 +3,19 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.54 (2026-11-24)
+
+- **Caught exceptions on Windows builds** (Clang, Zig's toolchain): a translated function's body
+  holding the resume point's `__builtin_setjmp` is never inlined into its wrapper (`__attribute__
+  ((noinline))`), and the rewrites' `EH_OWNER` is split the same way and reads `c` and its record
+  back after a resume. A resume's `__builtin_longjmp` restores no callee-saved registers; Clang kept
+  the wrapper's record pointer in one, so after one resume its `eh_pop` left the runtime's chain of
+  frame records pointing at garbage and the next throw faulted walking it (Penguins!: its first
+  caught throw on Windows). GCC builds (Linux) weren't affected. Checked: Penguins! on Windows
+  catches its throws and plays into its first level; self-test and stub game unchanged.
+- **Regenerate** (every translated function with resume points changes); no re-record: GCC builds
+  run the same.
+
 ## v0.2.53 (2026-11-24)
 
 - **A shared Direct3D 8 bridge to DXVK**: `runtime/d3d8` (`d3d8.c`, `d3d8_bridge.h`, README) and

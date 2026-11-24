@@ -652,14 +652,19 @@ class FuncGen:
         if rs:
             # a catch / __except may go on in this function from outside (runtime/eh.c): its
             # frame record lives from entry to return, the body holds the place to jump back to
-            out += ['static void %s_eh(CPU *restrict c, EHFrame *eh_);' % body_name,
+            # (never inlined into the wrapper: a resume's __builtin_longjmp restores no callee-saved
+            # registers, and Clang (Zig's Windows builds) can keep the wrapper's record pointer in one,
+            # its eh_pop then corrupting the runtime's chain of records [verified: Penguins!' first caught
+            # throw on Windows, fixed by this]. Out of line, the body's own epilogue gives the wrapper its
+            # registers back.)
+            out += ['static __attribute__((noinline)) void %s_eh(CPU *restrict c, EHFrame *eh_);' % body_name,
                     'void %s(CPU *restrict c)' % body_name, '{'] + inner_line + [
                     '    static const uint32_t eh_at_[] = {%s, 0};' % ', '.join(hx(a) for a in rs),
                     '    EHFrame eh_;',
                     '    eh_push(c, &eh_, c->esp, eh_at_);',
                     '    %s_eh(c, &eh_);' % body_name,
                     '    eh_pop(&eh_);', '}', '',
-                    'static void %s_eh(CPU *restrict c, EHFrame *eh_)' % body_name]
+                    'static __attribute__((noinline)) void %s_eh(CPU *restrict c, EHFrame *eh_)' % body_name]
         else:
             # restrict: the CPU record is never program memory, so the compiler may keep registers
             # and the x87 stack top in host registers across the program's memory accesses

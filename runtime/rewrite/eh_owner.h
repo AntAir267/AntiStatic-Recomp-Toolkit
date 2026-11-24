@@ -35,16 +35,26 @@
    one, cont(c, target) runs instead (it finishes the function: its epilogue and return). body and
    cont return as decomp_ret does. The record lives from entry to return, as the translated
    owner's (translator/codegen.py), so a throw deeper in the call chain finds it. */
+/* (the __builtin_setjmp sits in a function of its own, never inlined, and after a resume reads c and
+   the record back from the runtime: a resume's __builtin_longjmp restores no callee-saved registers,
+   and Clang keeps values there that GCC doesn't [verified: Penguins!' Windows build caught its throws
+   and played into its first level once the translated owners' bodies were out of line, v0.2.54]) */
 #define EH_OWNER(addr, name, body, cont, ...)                                   \
+    static __attribute__((noinline)) void name##_eh(CPU *c, EHFrame *eh_)     \
+    {                                                                           \
+        if (__builtin_setjmp(eh_->jb)) {                                        \
+            c = eh_resumed_cpu();                                               \
+            eh_ = eh_resumed_frame();                                           \
+            cont(c, eh_->target);                                               \
+        } else                                                                  \
+            body(c);                                                            \
+    }                                                                           \
     static __attribute__((noinline)) int name(CPU *c)                         \
     {                                                                           \
         static const uint32_t at_[] = {__VA_ARGS__, 0};                         \
         EHFrame eh_;                                                            \
         eh_push(c, &eh_, c->esp, at_);                                          \
-        if (__builtin_setjmp(eh_.jb))                                           \
-            cont(c, eh_.target);                                                \
-        else                                                                    \
-            body(c);                                                            \
+        name##_eh(c, &eh_);                                                     \
         eh_pop(&eh_);                                                           \
         return 1;                                                               \
     }                                                                           \
