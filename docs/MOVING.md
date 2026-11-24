@@ -107,6 +107,11 @@ Behaviour the toolkit has that most ports' copies don't (each can move a hash):
   `real`; `test_vram = MB`), and DXVK is told the same vendor; a game that keeps anything from them
   moves its hashes once (the same re-record). If the game branches on the vendor, record a route per
   test card (runtime/d3d9/README.md)
+- (v0.2.53) a Direct3D 8 port can drop its own `d3d8.c`, `d3d8_bridge.h` and `d3d8gen.py` for the
+  toolkit's (`runtime/d3d8`, `tools/d3d8`; runtime/d3d8/README.md): set `PORT_D3D8_FIXED_MODES 1` if the
+  game needs the fixed mode list in real runs, `PORT_D3D8_MODES_FILTER 1` for the resolution filter;
+  a renderer of its own keeps its `vk_create8` / `vk8_buf_host` / `vk_debug8`. Under `--test` it
+  answers as the test card, so record baselines again if your copy didn't
 - outside test runs only: `Sleep(0)` polling and clock-spin waits sleep instead of spinning; the
   frame limiter sleeps to its deadline
 

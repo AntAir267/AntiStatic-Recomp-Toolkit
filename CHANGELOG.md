@@ -3,6 +3,25 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.53 (2026-11-24)
+
+- **A shared Direct3D 8 bridge to DXVK**: `runtime/d3d8` (`d3d8.c`, `d3d8_bridge.h`, README) and
+  `tools/d3d8/d3d8gen.py`, merged from the D3D8 ports' own copies (LEGO Island Xtreme Stunts' the
+  base). In it: the `--test` card as the D3D9 bridge's (`test_card`, `test_vram`; GetAdapterIdentifier,
+  both GetDeviceCaps' MaxPointSize, GetAvailableTextureMem, DXVK's vendor), the 1920x1080 test desktop,
+  GetAdapterIdentifier copied as the program's 1068 bytes (DXVK wrote 1072), the fixed modes with no
+  screen, option `anisotropic`, plain buffer locks covering the whole buffer, lockable back buffers for
+  `--shot`, the Windows path (option `d3d8_dll`, DXVK's `d3d8.dll` beside the program, then Windows'
+  own), weak hooks for a port's own Vulkan renderer (`vk_create8`, `vk8_buf_host`, `vk_debug8`), and
+  `<PORT_ENV>_D3D_INVENTORY` now written at exit (no copy called its writer). Port settings:
+  `PORT_D3D8_FIXED_MODES 1` (the fixed list in real runs too), `PORT_D3D8_MODES_FILTER 1` (only
+  option `resolution`'s modes).
+- Checked: LEGO Island Xtreme Stunts on it, call counts identical at all 84 points and 4 frames
+  pixel-identical; Penguins! into its first level, frame 8500 pixel-identical. Memory under `--test`
+  moves once (the test card). Windows: builds; a start-up failure there is in the Windows host, not
+  the bridge (the ports' old bridge fails the same), and is being looked into.
+- A D3D8 port moving onto it drops its own copy (docs/MOVING.md); its generated bridge changes.
+
 ## v0.2.52 (2026-11-24)
 
 - **`cpu_x87_sin`, `cpu_x87_cos`, `cpu_x87_tan`, `cpu_x87_atan2`, `cpu_x87_f2xm1`, `cpu_x87_yl2x`,
