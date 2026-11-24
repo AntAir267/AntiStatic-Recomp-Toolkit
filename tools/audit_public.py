@@ -61,7 +61,7 @@ def check(name, data, history=False):
         m = PRIVATE_NAME.search(data)
         if m:
             bad.append("the maintainer's first name (line %d)" % (data.count(b'\n', 0, m.start()) + 1))
-        m = PRIVATE_MACHINE.search(data) if not history else None   # (the files published, not past commits)
+        m = PRIVATE_MACHINE.search(data)
         if m and not name.endswith(SELF):
             bad.append("one of the maintainer's machines (%r, line %d)" % (m.group().decode(), data.count(b'\n', 0, m.start()) + 1))
     if ext in IMAGE_EXT and not name.startswith('art/'):
