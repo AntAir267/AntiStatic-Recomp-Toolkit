@@ -2462,8 +2462,15 @@ static uint32_t enum_devices(CPU *c, int wide)
     }
     uint32_t (*str)(const char *) = wide ? enum_wstr : enum_str;
     LOG(LOG_SOUND, "DirectSoundEnumerate%c: the primary driver and one device", wide ? 'W' : 'A');
-    if (guest_call(c, cb, 4, 0u, str("Primary Sound Driver"), str(""), ctx))
-        guest_call(c, cb, 4, guid, str("Speakers"), str("dsound.dll"), ctx);
+    /* each string allocated in its own statement, in the order GCC's builds always made them (the
+       module name, then the description): two allocations in one argument list come out in
+       either order, and Clang's (Zig's) builds had another heap from frame 1 (Test Drive 6) */
+    uint32_t mod = str(""), desc = str("Primary Sound Driver");
+    if (guest_call(c, cb, 4, 0u, desc, mod, ctx)) {
+        mod = str("dsound.dll");
+        desc = str("Speakers");
+        guest_call(c, cb, 4, guid, desc, mod, ctx);
+    }
     return DS_OK;
 }
 

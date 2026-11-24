@@ -3,6 +3,15 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.51 (2026-11-24)
+
+- **DirectSoundEnumerate allocates its strings in a fixed order** (Test Drive 6): two allocations
+  in one argument list came out in GCC's order (right to left) in the Linux builds and Clang's (left
+  to right) in Zig's, so the program's heap differed between them from frame 1. Each is now its own
+  statement, in the order GCC's builds always made them, so recorded GCC runs don't move and Zig
+  builds now match them. No other call in the runtime allocates twice in one argument list.
+- No regenerate.
+
 ## v0.2.50 (2026-11-24)
 
 From Stranglehold (Unreal Engine 3):
