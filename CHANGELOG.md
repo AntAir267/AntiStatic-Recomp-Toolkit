@@ -3,6 +3,17 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.52 (2026-11-24)
+
+- **`cpu_x87_sin`, `cpu_x87_cos`, `cpu_x87_tan`, `cpu_x87_atan2`, `cpu_x87_f2xm1`, `cpu_x87_yl2x`,
+  `cpu_x87_yl2xp1`** (cpu.h, fpu.c): the x87 transcendentals as values, as the translated
+  instructions compute them (portable unless `PORT_X87_PORTABLE 0`), for a port's hand-written
+  rewrites. A rewrite's own inline fsin gave the host's answer whatever the setting said. They keep
+  the host's control word.
+- cpu.h no longer pulls in `<math.h>` (sse_portable.h used it for one square root): C23's `fmul` /
+  `fdiv` clashed with a port's own helpers of those names.
+- No regenerate.
+
 ## v0.2.51 (2026-11-24)
 
 - **DirectSoundEnumerate allocates its strings in a fixed order** (Test Drive 6): two allocations

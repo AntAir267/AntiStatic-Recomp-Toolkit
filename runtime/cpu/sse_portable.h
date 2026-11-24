@@ -11,7 +11,6 @@
    |x| >= 2^126 too (the result is tiny and flushed, as the hardware's approximation is); rsqrt of a negative number or -inf is the default NaN
    (0xffc00000), of +inf a +0. */
 #pragma once
-#include <math.h>
 
 static inline uint32_t sse_fbits(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }
 static inline float sse_bitsf(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
@@ -33,7 +32,7 @@ static inline float cpu_rsqrt1(float x)
     if (a < 0x00800000u) return sse_bitsf(s | 0x7f800000u);     /* -0 / +0, denormals: -inf / +inf */
     if (s) return sse_bitsf(0xffc00000u);                       /* negative, -inf: the default NaN */
     if (a == 0x7f800000u) return 0.0f;
-    return (float)(1.0 / sqrt((double)x));
+    return (float)(1.0 / __builtin_sqrt((double)x));   /* (not math.h: cpu.h is in every file) */
 }
 
 static inline __m128 cpu_rcp_ss(__m128 v) { return _mm_move_ss(v, _mm_set_ss(cpu_rcp1(_mm_cvtss_f32(v)))); }

@@ -154,6 +154,78 @@ void fpu_ldconst(CPU *c, int which)
 static int soft_ok(f80 x) { return isfinite(x) && x != 0; }
 #endif
 
+/* The same as values, for a port's hand-written rewrites that do the original's fsin / fcos / fptan /
+   fpatan / f2xm1 / fyl2x / fyl2xp1 themselves (inline asm gave the host's answer whatever
+   PORT_X87_PORTABLE said): cpu_x87_sin(x) and the rest, cpu.h. They keep the host's control word. */
+static inline uint16_t host_fnstcw(void) { uint16_t cw; __asm__ volatile("fnstcw %0" : "=m"(cw)); return cw; }
+#if PORT_X87_PORTABLE
+#define VSOFT(expr) do { uint16_t cw0 = host_fnstcw(); host_fldcw((uint16_t)(0x037f | (cw0 & 0x3f))); \
+                         f80 r_ = (expr); host_fldcw(cw0); return r_; } while (0)
+#endif
+f80 cpu_x87_sin(f80 x)
+{
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && fabsl(x) < 0x1p63L) VSOFT(x87s_sin(x));
+#endif
+    __asm__("fsin" : "+t"(x));
+    return x;
+}
+f80 cpu_x87_cos(f80 x)
+{
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && fabsl(x) < 0x1p63L) VSOFT(x87s_cos(x));
+#endif
+    __asm__("fcos" : "+t"(x));
+    return x;
+}
+f80 cpu_x87_tan(f80 x)                  /* fptan's ST(1): the tangent (its pushed 1.0 dropped) */
+{
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && fabsl(x) < 0x1p63L) VSOFT(x87s_tan(x));
+#endif
+    f80 one;
+    if (!(fabsl(x) < 0x1p63L) && isfinite(x))
+        return x;                       /* (out of range: the operand, as fptan leaves it) */
+    __asm__("fptan" : "=t"(one), "=u"(x) : "0"(x));
+    (void)one;
+    return x;
+}
+f80 cpu_x87_atan2(f80 y, f80 x)         /* fpatan: ST(1) = y, ST(0) = x */
+{
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && soft_ok(y)) VSOFT(x87s_atan2(y, x));
+#endif
+    f80 r;
+    __asm__("fpatan" : "=t"(r) : "0"(x), "u"(y) : "st(1)");
+    return r;
+}
+f80 cpu_x87_f2xm1(f80 x)
+{
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && fabsl(x) <= 1.0L) VSOFT(x87s_f2xm1(x));
+#endif
+    __asm__("f2xm1" : "+t"(x));
+    return x;
+}
+f80 cpu_x87_yl2x(f80 y, f80 x)          /* fyl2x: y * log2(x) */
+{
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && x > 0 && x != 1.0L && soft_ok(y)) VSOFT(y * x87s_log2(x));
+#endif
+    f80 r;
+    __asm__("fyl2x" : "=t"(r) : "0"(x), "u"(y) : "st(1)");
+    return r;
+}
+f80 cpu_x87_yl2xp1(f80 y, f80 x)        /* fyl2xp1: y * log2(1 + x) */
+{
+#if PORT_X87_PORTABLE
+    if (soft_ok(x) && x > -1.0L && soft_ok(y)) VSOFT(y * x87s_log2p1(x));
+#endif
+    f80 r;
+    __asm__("fyl2xp1" : "=t"(r) : "0"(x), "u"(y) : "st(1)");
+    return r;
+}
+
 void fpu_f2xm1(CPU *c)
 {
     f80 v = ST(0);

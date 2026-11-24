@@ -224,6 +224,10 @@ void fpu_rstor(CPU *c, uint32_t a);
 
 /* ------------------------------------------------------------------ control flow */
 
+/* the x87 transcendentals as values, as the translated instructions compute them (portable unless
+   PORT_X87_PORTABLE 0): for a port's own rewrites (fpu.c) */
+f80 cpu_x87_sin(f80 x), cpu_x87_cos(f80 x), cpu_x87_tan(f80 x), cpu_x87_atan2(f80 y, f80 x);
+f80 cpu_x87_f2xm1(f80 x), cpu_x87_yl2x(f80 y, f80 x), cpu_x87_yl2xp1(f80 y, f80 x);
 void icall(CPU *c, uint32_t target);                 /* call through a pointer */
 void ijump(CPU *c, uint32_t target);                 /* jump through a pointer (an indirect tail call) */
 void bad_ret(CPU *c, uint32_t site, uint32_t expected);
