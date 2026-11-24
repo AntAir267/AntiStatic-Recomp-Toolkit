@@ -421,7 +421,9 @@ class Discovery:
             elif m == 'call':
                 op = i.ops[0]
                 returns = True
-                if op[0] == 'i':
+                if op[0] == 'i' and op[1] == nxt:
+                    pass        # call $+5: pushes its own address (the get-PC idiom), no function
+                elif op[0] == 'i':
                     t = op[1]
                     if dec.in_text(t):
                         f.calls.add(t)

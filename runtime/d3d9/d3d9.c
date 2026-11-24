@@ -607,9 +607,32 @@ static const uint16_t test_modes[][2] = {
 #define NTEST_MODES ((UINT)(sizeof test_modes / sizeof *test_modes))
 static int test_mode_format(D3DFORMAT f) { return f == D3DFMT_X8R8G8B8 || f == D3DFMT_A8R8G8B8; }
 
+/* the fixed modes and desktop: under --test, and on a PC with no screen (SDL's offscreen driver,
+   where DXVK's desktop is 0x0: Stranglehold sized its window from it and never made its device) */
+static int fixed_modes(uint32_t d3d)
+{
+    static int none = -1;
+    if (deterministic)
+        return 1;
+    extern int host_no_screen(void);
+    if (none < 0 && host_no_screen()) {
+        none = 1;
+        LOG(LOG_ALWAYS, "D3D9: no screen (SDL offscreen): the fixed modes and a 1920x1080 desktop");
+    }
+    if (none < 0) {
+        D3DDISPLAYMODE m = {0};
+        void *self = d3d_host(d3d);
+        HRESULT r = ((HRESULT (*)(void *, UINT, D3DDISPLAYMODE *))VT(self)[8])(self, 0, &m);
+        none = r < 0 || m.Width < 320 || m.Height < 240;
+        if (none)
+            LOG(LOG_ALWAYS, "D3D9: no screen (desktop %ux%u): the fixed modes and a 1920x1080 desktop", m.Width, m.Height);
+    }
+    return none;
+}
+
 HOSTFN(sp_IDirect3D9_GetAdapterModeCount, 3)
 {
-    if (deterministic)
+    if (fixed_modes(ARG(0)))
         return ARG(1) == 0 && test_mode_format((D3DFORMAT)ARG(2)) ? NTEST_MODES : 0;
     void *self = d3d_host(ARG(0));
     return (uint32_t)((UINT (*)(void *, UINT, D3DFORMAT))VT(self)[6])(self, (UINT)ARG(1), (D3DFORMAT)ARG(2));
@@ -617,7 +640,7 @@ HOSTFN(sp_IDirect3D9_GetAdapterModeCount, 3)
 
 HOSTFN(sp_IDirect3D9_EnumAdapterModes, 5)
 {
-    if (deterministic) {
+    if (fixed_modes(ARG(0))) {
         if (ARG(1) != 0 || !test_mode_format((D3DFORMAT)ARG(2)) || ARG(3) >= NTEST_MODES || !ARG(4))
             return D3DERR_INVALIDCALL;
         D3DDISPLAYMODE m = {test_modes[ARG(3)][0], test_modes[ARG(3)][1], 60, (D3DFORMAT)ARG(2)};
@@ -705,7 +728,7 @@ HOSTFN(sp_IDirect3DDevice9_GetAvailableTextureMem, 1)
 
 HOSTFN(sp_IDirect3D9_GetAdapterDisplayMode, 3)
 {
-    if (deterministic) {
+    if (fixed_modes(ARG(0))) {
         if (ARG(1) != 0 || !ARG(2))
             return D3DERR_INVALIDCALL;
         D3DDISPLAYMODE m = {1920, 1080, 60, D3DFMT_X8R8G8B8};

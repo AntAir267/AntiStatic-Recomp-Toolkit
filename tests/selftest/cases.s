@@ -682,6 +682,19 @@ case_fcmov:
         fstp qword ptr [R + 72]
         ret
 
+# call to the next instruction (the get-PC idiom: UE3's context capture), then pop it
+case_call_next:
+        call call_next_a
+call_next_a:
+        pop eax
+        sub eax, offset call_next_a     # 0: it pushed its own address
+        mov [R + 0], eax
+        call call_next_b
+call_next_b:
+        add esp, 4
+        mov [R + 4], esp
+        ret
+
 # the SSE bitwise ops on whole registers and movq on xmm (xboxrecomp 27ce783: they vanished there)
 case_sse_logic:
         movdqu xmm0, [S + 0]

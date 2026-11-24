@@ -3,6 +3,22 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.50 (2026-11-24)
+
+From Stranglehold (Unreal Engine 3):
+- **A call to the next instruction is a push** (the get-PC idiom, `call $+5; pop eax`: UE3's
+  context capture after a caught `appThrowf`). The translator made the next instruction a function,
+  which popped its own return address and returned with its caller's ("returned to 006fe651
+  instead of 006fd3e8"). Self-test case `case_call_next`. **Regenerate** if your game has the idiom
+  (the generated code says "call to the next instruction"); L.A. Rush, Nitronic Rush and LEGO
+  Island 2 translate byte for byte the same.
+- **No screen** (SDL's offscreen driver: a PC with no display, the farm's jobs): the desktop is
+  1920x1080 (`host_no_screen()`, win.c), and the D3D9 bridge gives the fixed mode list and desktop
+  of `--test`. The probe window measured 1280x720 there and "maximized" did nothing, and UE3 fitted
+  its 1920x1080 window into that as 0x0 and never made its device. A screen under 320x240 counts as
+  none too.
+- No regenerate apart from the first item.
+
 ## v0.2.49 (2026-11-24)
 
 - **`<PORT_ENV>_TEST_THROW_TYPE=wstr`**: the test throw is a `wchar_t*` (`L"test throw"`, type

@@ -28,6 +28,7 @@ void post_message(uint32_t msg, uint32_t wparam, uint32_t lparam);
 void program_screen_size(int *w, int *h);   /* the screen the program sees (user32x.c; port.h PORT_SCREEN_W/H) */
 /* the mouse in the game's pixels (user32.c): a controller's pointer, scripted input */
 void host_mouse_at(int x, int y);
+int host_no_screen(void);                 /* SDL's offscreen driver: no real screen (win.c) */
 void host_mouse_where(int *x, int *y);
 void host_mouse_button(int b, int down);   /* 0 left, 1 right, 2 middle */
 

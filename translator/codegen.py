@@ -1552,6 +1552,12 @@ class FuncGen:
         E = self.emit
         ret = hx(i.next)
         noret = False
+        if op[0] == 'i' and op[1] == i.next:
+            # call $+5: the get-PC idiom (UE3's context capture: call next; pop eax). Its address
+            # pushed and on: made a call, the next instruction became a function that popped its
+            # own return address and returned with its caller's (Stranglehold, 0x6fd3e3)
+            E('esp -= 4; W32(esp, %s);   /* call to the next instruction, done in place */' % ret)
+            return False
         if op[0] == 'i' and (self.prog.inline.get(op[1]) == 'ftol' or self.prog.frame_steps.get(a) == 'dither') \
                 and not self.prog.ret_flags.get(op[1]) and a not in self.after_call:
             # MSVC's _ftol: truncate ST(0) to a 64-bit integer in edx:eax and pop. The original

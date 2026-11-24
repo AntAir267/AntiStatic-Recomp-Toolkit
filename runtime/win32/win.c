@@ -227,8 +227,23 @@ static int screen_of_window(int *w, int *h)
     return 1;
 }
 
+/* no screen: SDL's offscreen driver (a PC with no display, the farm's jobs), whose screen is a
+   made-up one: the probe window measures 1280x720 there and "maximized" changes nothing, and
+   Stranglehold sized its window from that to 0x0 and never made its device */
+int host_no_screen(void)
+{
+    const char *d = sdl_ok ? SDL_GetCurrentVideoDriver() : NULL;
+    return d && !strcmp(d, "offscreen");
+}
+
 static void desktop_probe(void)
 {
+    if (host_no_screen()) {
+        desk_w = 1920;
+        desk_h = 1080;
+        LOG(LOG_ALWAYS, "screen: none (SDL offscreen): taken as 1920x1080");
+        return;
+    }
     if (window && !fullscreen) {        /* already made, in a window: the first screen SDL lists */
         desk_w = 0;
         goto fallback;
@@ -278,6 +293,14 @@ fallback:
         const SDL_DisplayMode *m = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
         desk_w = m ? (int)lroundf(m->w * m->pixel_density) : 1920;
         desk_h = m ? (int)lroundf(m->h * m->pixel_density) : 1080;
+    }
+    /* no screen at all (SDL's offscreen driver lists one of 0x0, a PC with no display): 1920x1080,
+       as test runs have; a game sized its window from 0x0 and never made its device (Stranglehold
+       on a PC with no display) */
+    if (desk_w < 320 || desk_h < 240) {
+        LOG(LOG_ALWAYS, "screen: none (%dx%d): taken as 1920x1080", desk_w, desk_h);
+        desk_w = 1920;
+        desk_h = 1080;
     }
 }
 
