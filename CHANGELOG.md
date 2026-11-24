@@ -3,6 +3,17 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.49 (2026-11-24)
+
+- **`<PORT_ENV>_TEST_THROW_TYPE=wstr`**: the test throw is a `wchar_t*` (`L"test throw"`, type
+  descriptors `.PA_W` and `.PAX`, thrown non-const) instead of an `int`, so a catch of Unreal Engine
+  3's `appThrowf` text (`catch (const TCHAR*)`) takes it (Stranglehold). The stub game throws both kinds.
+- The log names each kind of resume: "longjmp (the C runtime's)", "nonlocal jump (a translated
+  longjmp)", "exception handled (C++ catch)", "exception handled (__except block)" and "exception
+  handled (a C runtime's continuation jump)". All of them read "exception handled" before, so
+  libjpeg's longjmps inside d3dx9 looked like caught faults (Nitronic Rush).
+- No regenerate.
+
 ## v0.2.48 (2026-11-23)
 
 - **`HOOKS = {addr: 'test_throw'}` links now** (Nitronic Rush found it couldn't): a hook is the

@@ -110,6 +110,18 @@ else
     echo "stub game (test throw): FAILED (exit $code; $B/run_throw.log)"
     fail=1
 fi
+# the same with a wchar_t* (TEST_THROW_TYPE=wstr: Unreal Engine 3's throws)
+rm -f $B/user/result.txt
+set +e
+STUB_TEST_THROW=1 STUB_TEST_THROW_TYPE=wstr $B/stub --game "$PWD/$B/game" --user "$PWD/$B/user" --test --hidden --logfile "$PWD/$B/run_throw_w.log" >/dev/null 2>&1
+code=$?
+set -e
+if [ $code = 42 ] && cmp -s $B/user/result.txt tests/stubgame/expected.txt && grep -q "test throw: call 1 .*wchar_t" $B/run_throw_w.log; then
+    echo "stub game (test throw, wchar_t*): ok, caught and gone on from"
+else
+    echo "stub game (test throw, wchar_t*): FAILED (exit $code; $B/run_throw_w.log)"
+    fail=1
+fi
 # The per-function check (runtime/rewrite/fncheck.c) through the A/B script: stub_mix's rewrite
 # against its translation must be the same on every input of fncheck.spec, and the deliberate bug
 # (STUB_MIX_MUTANT=1, an input the game never gives) must show as DIFFER

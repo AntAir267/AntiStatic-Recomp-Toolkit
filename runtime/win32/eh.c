@@ -57,14 +57,15 @@ void eh_lost(CPU *c, EHFrame *f)
 }
 
 /* Goes on at `target` with these esp and ebp if a live frame holds it; else returns 0. */
-static int eh_resume(CPU *c, uint32_t target, uint32_t esp, uint32_t ebp)
+/* why: what is going on there, for the log ("longjmp", "C++ catch", "__except", ...) */
+static int eh_resume(CPU *c, uint32_t target, uint32_t esp, uint32_t ebp, const char *why)
 {
     for (EHFrame *f = eh_top; f; f = f->next) {
         if (f->esp < esp)
             continue;                    /* a callee being abandoned */
         for (const uint32_t *p = f->at; *p; p++)
             if (*p == target) {
-                LOG(LOG_API, "exception handled: going on at %08x (esp %08x, ebp %08x)", target, esp, ebp);
+                LOG(LOG_API, "%s: going on at %08x (esp %08x, ebp %08x)", why, target, esp, ebp);
                 eh_top = f;
                 f->target = target;
                 c->esp = esp;
@@ -81,7 +82,8 @@ static int eh_resume(CPU *c, uint32_t target, uint32_t esp, uint32_t ebp)
 /* the same for the runtime's other non-local returns (longjmp, nonlocal_jump) */
 int eh_resume_at(CPU *c, uint32_t target, uint32_t esp, uint32_t ebp)
 {
-    return eh_resume(c, target, esp, ebp);
+    return eh_resume(c, target, esp, ebp, eh_dispatching ? "exception handled (a C runtime's continuation jump)"
+                                                          : "nonlocal jump (a translated longjmp)");
 }
 
 /* icall, while an exception is dispatched, of a place a live frame goes on at: an __except block
@@ -89,14 +91,14 @@ int eh_resume_at(CPU *c, uint32_t target, uint32_t esp, uint32_t ebp)
    itself. 0 when it isn't one. */
 int eh_resume_place(CPU *c, uint32_t target)
 {
-    return eh_resume(c, target, c->esp, c->ebp);
+    return eh_resume(c, target, c->esp, c->ebp, "exception handled (__except block)");
 }
 
 /* icall of code that is no function: an __except block that _except_handler3 calls (ebp is
    the frame's; the block's first act is esp = [ebp-0x18]) */
 int eh_resume_call(CPU *c, uint32_t target)
 {
-    return eh_resume(c, target, R32(c->ebp - 0x18), c->ebp);
+    return eh_resume(c, target, R32(c->ebp - 0x18), c->ebp, "exception handled (__except block)");
 }
 
 /* MSVCRT's _JumpToContinuation(target, registration): unlinks the top registration, esp from
@@ -107,7 +109,7 @@ static int jump_to_continuation_hook(CPU *c)
     uint32_t target = R32(c->esp + 4), reg = R32(c->esp + 8);
     uint32_t top = R32(c->fs_base);
     W32(c->fs_base, R32(top));
-    if (!eh_resume(c, target, R32(reg - 4), reg + 0xc))
+    if (!eh_resume(c, target, R32(reg - 4), reg + 0xc, "exception handled (C++ catch)"))
         fatal("a C++ catch goes on at %08x, which no live function holds", target);
     return 1;
 }
@@ -197,37 +199,60 @@ static uint32_t raise_exception(CPU *c, uint32_t code, uint32_t flags, uint32_t 
 /* A TEST THROW, for checking that a port's caught C++ exceptions go on (Nitronic Rush's request): a
    port names a function that runs inside a try block in its build config, HOOKS = {addr:
    'test_throw'}, and with <PORT_ENV>_TEST_THROW=N the Nth call of it (1: the first) throws a C++
-   exception of type int from its first instruction, as `throw 0;` as its first statement would.
-   A catch(...) or catch(int) around the call takes it; nothing catching it ends the run (fatal),
+   exception of type int from its first instruction, as `throw 0;` as its first statement would
+   (<PORT_ENV>_TEST_THROW_TYPE=wstr: a wchar_t*, L"test throw", as Unreal Engine 3's appThrowf).
+   A catch(...) or a catch of that type around the call takes it; nothing catching it ends the run (fatal),
    which says the function wasn't inside a try. Without the variable the function runs as it is.
    The hook is the generated table's pointer (eh_init sets it); eh_test_throw is the function, which a
    port's own hook may call too (Nitronic Rush throws only from one caller of operator new). */
 int eh_test_throw(CPU *c)
 {
-    static int nth = -1, calls;
-    static uint32_t blk;
+    static int nth = -1, calls, wstr;
+    static uint32_t args_int, args_wstr;
     if (nth < 0) {
-        const char *e = port_getenv("TEST_THROW");
+        const char *e = port_getenv("TEST_THROW"), *t = port_getenv("TEST_THROW_TYPE");
         nth = e ? atoi(e) : 0;
+        wstr = t && !strcmp(t, "wstr");
     }
     if (!nth || ++calls != nth)
         return 0;
-    if (!blk) {
-        /* in program memory: the thrown int, its ThrowInfo {attributes, unwind, forward compat,
-           catchable types}, the array {1, type}, the CatchableType {simple, type descriptor,
-           displacement 0 -1 0, size 4, no copy} and the TypeDescriptor {vtable, spare, ".H"} */
-        blk = galloc(128);
-        uint32_t obj = blk, ti = blk + 8, cta = blk + 24, ct = blk + 32, td = blk + 64, args = blk + 96;
+    /* in program memory: the thrown object, its ThrowInfo {attributes, unwind, forward compat,
+       catchable types}, the array {n, types...}, each CatchableType {simple, type descriptor,
+       displacement 0 -1 0, size 4, no copy} and its TypeDescriptor {vtable, spare, name}. MSVC's
+       catch matching compares descriptors by name, so these match the program's own. */
+    if (!args_int) {
+        uint32_t b = galloc(128), obj = b, ti = b + 8, cta = b + 24, ct = b + 32, td = b + 64;
         W32(obj, 0);
         W32(ti, 0); W32(ti + 4, 0); W32(ti + 8, 0); W32(ti + 12, cta);
         W32(cta, 1); W32(cta + 4, ct);
         W32(ct, 1); W32(ct + 4, td); W32(ct + 8, 0); W32(ct + 12, 0xffffffffu); W32(ct + 16, 0);
         W32(ct + 20, 4); W32(ct + 24, 0);
-        W32(td, 0); W32(td + 4, 0); W8(td + 8, '.'); W8(td + 9, 'H'); W8(td + 10, 0);
-        W32(args, 0x19930520u); W32(args + 4, obj); W32(args + 8, ti);
+        W32(td, 0); W32(td + 4, 0); gstrncpy(td + 8, ".H", 4);              /* int */
+        args_int = b + 96;
+        W32(args_int, 0x19930520u); W32(args_int + 4, obj); W32(args_int + 8, ti);
+        /* TEST_THROW_TYPE=wstr: a wchar_t* (Unreal Engine 3's appThrowf: catch (const TCHAR*)),
+           thrown as non-const so a catch with or without const takes it; wchar_t* and void* */
+        uint32_t w = galloc(256), text = w, wobj = w + 32, wti = w + 40, wcta = w + 56;
+        uint32_t ct1 = w + 72, ct2 = w + 100, td1 = w + 128, td2 = w + 160;
+        static const char msg[] = "test throw";
+        for (unsigned k = 0; k <= sizeof msg - 1; k++)
+            W16(text + 2 * k, (uint16_t)msg[k]);
+        W32(wobj, text);
+        W32(wti, 0); W32(wti + 4, 0); W32(wti + 8, 0); W32(wti + 12, wcta);
+        W32(wcta, 2); W32(wcta + 4, ct1); W32(wcta + 8, ct2);
+        uint32_t cts[2] = {ct1, ct2}, tds[2] = {td1, td2};
+        static const char *const names[2] = {".PA_W", ".PAX"};
+        for (int k = 0; k < 2; k++) {
+            W32(cts[k], 1); W32(cts[k] + 4, tds[k]); W32(cts[k] + 8, 0); W32(cts[k] + 12, 0xffffffffu);
+            W32(cts[k] + 16, 0); W32(cts[k] + 20, 4); W32(cts[k] + 24, 0);
+            W32(tds[k], 0); W32(tds[k] + 4, 0); gstrncpy(tds[k] + 8, names[k], 16);
+        }
+        args_wstr = w + 200;
+        W32(args_wstr, 0x19930520u); W32(args_wstr + 4, wobj); W32(args_wstr + 8, wti);
     }
-    LOG(LOG_ALWAYS, "test throw: call %d of the function at the hook (return address %08x)", calls, R32(c->esp));
-    raise_exception(c, 0xe06d7363u, EXCEPTION_NONCONTINUABLE, 3, blk + 96, R32(c->esp));
+    LOG(LOG_ALWAYS, "test throw: call %d of the function at the hook (return address %08x), a %s",
+        calls, R32(c->esp), wstr ? "wchar_t* L\"test throw\"" : "int");
+    raise_exception(c, 0xe06d7363u, EXCEPTION_NONCONTINUABLE, 3, wstr ? args_wstr : args_int, R32(c->esp));
     return 1;
 }
 
@@ -319,7 +344,7 @@ static void longjmp_to(CPU *c, uint32_t b, uint32_t value)
     c->edi = R32(b + 0x08);
     c->esi = R32(b + 0x0c);
     c->eax = value ? value : 1;
-    if (!eh_resume(c, target, R32(b + 0x10) + 4, R32(b + 0x00)))
+    if (!eh_resume(c, target, R32(b + 0x10) + 4, R32(b + 0x00), "longjmp (the C runtime's)"))
         fatal("longjmp to %08x, which no live function holds (a setjmp the translator did not see: "
               "build config SETJMP)", target);
     __builtin_unreachable();
