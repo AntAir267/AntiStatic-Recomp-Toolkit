@@ -82,6 +82,7 @@
 /* #define PORT_D3D7_FAST_SCREEN 1 */     /* XYZRHW|DIFFUSE|SPECULAR|TEX2 draws taken without unpacking (CPU time) */
 /* The Direct3D 9 bridge to DXVK (runtime/d3d9; its README lists the port_d3d9_* hooks) */
 /* #define PORT_D3D9_ANTIALIASING "4x" */     /* option antialiasing's default (default "off"; d3d9_msaa.c) */
+/* #define PORT_D3D9_MSAA_KEEP_DEPTH 1 */      /* antialiasing for a game that keeps the device's depth buffer bound (d3d9_msaa.c) */
 /* #define PORT_D3D9_ANISOTROPIC "16" */      /* option anisotropic's default ("off", 2, 4, 8, 16; default "16") */
 /* #define PORT_D3D9_SHADOW_FILTER "5" */     /* option shadow_filter's default ("original", 3, 5, 7; default
                                                  "original"; DXVK's soft-shadows patch) */

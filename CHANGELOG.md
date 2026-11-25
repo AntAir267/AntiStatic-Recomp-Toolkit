@@ -3,6 +3,16 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.56 (2026-11-24)
+
+- **`PORT_D3D9_MSAA_KEEP_DEPTH 1`**: antialiasing for a game that sets its render targets and keeps
+  the device's own depth buffer bound, never setting it again (Nitronic Rush: v0.2.55's trace showed
+  no SetDepthStencilSurface at all, so no twin was ever chosen). A target of the depth buffer's size
+  gets its twin when it is set (the scene and depth passes; not smaller ones such as a bloom chain).
+  Off by default: a game that sets a target while the last pass's depth buffer is still bound, then
+  a depth buffer of its own, could have a twin resolved into a pass drawn with another.
+- No regenerate.
+
 ## v0.2.55 (2026-11-24)
 
 - **`--log d3d` traces what a game binds while antialiasing is on** (d3d9_msaa.c): at each change of

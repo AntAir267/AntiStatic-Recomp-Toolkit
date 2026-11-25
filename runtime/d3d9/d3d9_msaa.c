@@ -13,6 +13,9 @@
 #include <stdlib.h>
 #include "d3d9_bridge.h"
 #include "options.h"
+#ifndef PORT_D3D9_MSAA_KEEP_DEPTH
+#define PORT_D3D9_MSAA_KEEP_DEPTH 0
+#endif
 
 /* a twin: the game's target, its multisampled twin, the target's texture (pointer only), and
    whether the twin may hold drawing not yet resolved into the target */
@@ -264,7 +267,23 @@ HOSTFN(sp_IDirect3DDevice9_SetRenderTarget, 3)
         return (uint32_t)((HRESULT (*)(void *, DWORD, void *))VT(self)[37])(self, ARG(1), rt);
     want(&want_rt, rt);
     /* (the same target again, as the HUD does for each of its parts: its twin kept, unresolved) */
-    uint32_t r = (uint32_t)bind(self, bound && bound->orig == rt && want_ds == dev_ds ? bound : NULL, 1);
+    Twin *t = bound && bound->orig == rt && want_ds == dev_ds ? bound : NULL;
+#if PORT_D3D9_MSAA_KEEP_DEPTH
+    /* PORT_D3D9_MSAA_KEEP_DEPTH 1: a game that sets its targets and keeps the device's own depth
+       buffer bound, never setting it again (Nitronic Rush: no SetDepthStencilSurface at all), gets
+       the twin when the target is set, for a target of the depth buffer's size (its scene and depth
+       passes; not its smaller bloom chain). Off by default: a game that sets a target while the
+       last pass's depth buffer is still bound, then its own (LA Rush), would have a twin resolved
+       into a pass drawn with another depth buffer. */
+    if (!t && want_ds == dev_ds && rt != dev_bb) {
+        D3DSURFACE_DESC d, dd;
+        desc_of(rt, &d);
+        desc_of(dev_ds, &dd);
+        if (d.Width == dd.Width && d.Height == dd.Height)
+            t = twin_of(self, rt);
+    }
+#endif
+    uint32_t r = (uint32_t)bind(self, t, 1);
     bind_trace("SetRenderTarget", want_rt, want_ds);
     return r;
 }
