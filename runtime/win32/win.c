@@ -470,16 +470,25 @@ static float window_density(void)
     float d = window ? SDL_GetWindowPixelDensity(window) : 1.0f;
     return d > 0 ? d : 1.0f;
 }
+/* The window's last point is the game's last pixel (from pcrecomp a67767b, its win32hle screen):
+   unless the picture is a whole number of pixels a point (a game larger than the window's points,
+   or a fractional HiDPI scale), the last point maps a pixel or two short of the right and bottom
+   edges, and a game that scrolls at its screen's last pixel never scrolls right or down. Where the
+   picture has bars on that side the last point is in a bar, already the last pixel. */
 static uint32_t mouse_lparam(float x, float y)
 {
     float d = window_density(), gx = x * d, gy = y * d;
+    int w = 0, h = 0, ww = 0, wh = 0;
+    host_game_size(&w, &h);
     if (port_window_to_game(x * d, y * d, &gx, &gy)) {
-        int w = 0, h = 0;
-        host_game_size(&w, &h);
         if (w > 0 && h > 0) {
             gx = gx < 0 ? 0 : gx > (float)w - 1 ? (float)w - 1 : gx;
             gy = gy < 0 ? 0 : gy > (float)h - 1 ? (float)h - 1 : gy;
         }
+    }
+    if (w > 0 && h > 0 && window && SDL_GetWindowSize(window, &ww, &wh) && ww > 0 && wh > 0) {
+        if (x >= (float)(ww - 1) && gx < (float)w - 1) gx = (float)w - 1;
+        if (y >= (float)(wh - 1) && gy < (float)h - 1) gy = (float)h - 1;
     }
     return ((uint32_t)(int)gy << 16) | ((uint32_t)(int)gx & 0xffff);
 }

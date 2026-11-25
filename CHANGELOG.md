@@ -3,6 +3,15 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.58 (2026-11-24)
+
+- **The mouse reaches the game's right and bottom edges** (win.c, from pcrecomp a67767b): the
+  window's last point is now the game's last pixel. Unless the picture is a whole number of pixels
+  a point (a game larger than the window's points, or a fractional HiDPI scale), that point mapped
+  a pixel or two short, so a game that scrolls or reacts at its screen's last pixel never did on the
+  right or at the bottom. Test runs take no real mouse, so nothing they record changes.
+- No regenerate, no baselines to re-record.
+
 ## v0.2.57 (2026-11-24)
 
 - **`PORT_D3D9_MSAA_KEEP_DEPTH 1` keeps the depth buffer's twin cleared**: a clear of the device's
