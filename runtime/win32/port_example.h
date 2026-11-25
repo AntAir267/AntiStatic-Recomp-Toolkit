@@ -116,6 +116,9 @@
 /* #define PORT_CURSOR_START_X 0 */           /* where GetCursorPos starts (320, 240 unless set) */
 /* #define PORT_CURSOR_START_Y 0 */
 /* #define PORT_DEFAULT_DISPLAY "fullscreen" */ /* start full screen unless options.txt says display = window */
+/* #define PORT_DEFAULT_SCREEN "internal" */   /* option screen's default: the screen full screen goes to (auto: the
+                                                  desktop's choice; primary, internal, or a connector such as DP-1;
+                                                  host_screen_choices gives a settings row its choices; win.c) */
 /* #define PORT_PAD_JOYS -1 */                /* ONE merged joystick (every controller drives it), made when the
                                                   first controller is plugged in and gone with the last: none with
                                                   none, as the game shipped (1NSANE) */

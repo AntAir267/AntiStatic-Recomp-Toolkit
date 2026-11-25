@@ -7,6 +7,10 @@
 #include <math.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <string.h>
+#ifdef __linux__
+#include <dirent.h>
+#endif
 #include <SDL3/SDL.h>
 #include <pthread.h>
 #include "runtime.h"
@@ -128,6 +132,190 @@ static void script_key(int dik, int down)
     post_message(down ? 0x0100 : 0x0101, vk, lparam);
 }
 
+/* ------------------------------------------------------------------ the screen
+   Option screen (options.txt, or a port's settings row through host_screen_choices): the screen the
+   game goes full screen on. "auto" (the default, port.h PORT_DEFAULT_SCREEN): where the desktop
+   puts it, as before. "primary": the desktop's main screen. "internal": the built-in panel (an eDP,
+   LVDS or DSI connector). Else a connector's name as Linux and the desktop's display settings give
+   it (eDP-1, DP-13), or part of a screen's name as SDL gives it. On Wayland a program can't place
+   its window, but SDL makes a window full screen on the screen it was last positioned on
+   (SDL_SetWindowPosition with SDL_WINDOWPOS_CENTERED_DISPLAY, then SDL_SetWindowFullscreen); a
+   window rule of the desktop's doesn't hold for that. A connector is found among SDL's screens by
+   its preferred mode's size in /sys/class/drm (either way round, for a turned screen; when exactly
+   one screen has it), else by SDL_VIDEO_DISPLAY_PRIORITY, set to it before SDL starts so that SDL
+   lists it first (Wayland), else by name. A screen not found: the desktop's choice, logged. */
+#ifndef PORT_DEFAULT_SCREEN
+#define PORT_DEFAULT_SCREEN "auto"
+#endif
+typedef struct { char name[32]; int w, h, internal; } Connector;
+static Connector conns[16];
+static int nconns;
+static char hinted[32];                 /* the connector SDL_VIDEO_DISPLAY_PRIORITY was given */
+
+static int conn_cmp(const void *a, const void *b)
+{
+    return strcmp(((const Connector *)a)->name, ((const Connector *)b)->name);
+}
+
+static void connectors_read(void)
+{
+    nconns = 0;
+#ifdef __linux__
+    DIR *d = opendir("/sys/class/drm");
+    if (!d) return;
+    struct dirent *e;
+    while ((e = readdir(d)) && nconns < (int)(sizeof conns / sizeof *conns)) {
+        const char *dash = strchr(e->d_name, '-');      /* (card1-eDP-1: the connector eDP-1) */
+        if (strncmp(e->d_name, "card", 4) || !dash || !dash[1]) continue;
+        char p[320], buf[64] = "";
+        snprintf(p, sizeof p, "/sys/class/drm/%s/status", e->d_name);
+        FILE *f = fopen(p, "r");
+        if (!f) continue;
+        int on = fgets(buf, sizeof buf, f) && !strncmp(buf, "connected", 9);
+        fclose(f);
+        if (!on) continue;
+        Connector *c = &conns[nconns++];
+        snprintf(c->name, sizeof c->name, "%s", dash + 1);
+        c->w = c->h = 0;
+        snprintf(p, sizeof p, "/sys/class/drm/%s/modes", e->d_name);
+        if ((f = fopen(p, "r"))) {                      /* (its first mode is the preferred one) */
+            if (fgets(buf, sizeof buf, f) && sscanf(buf, "%dx%d", &c->w, &c->h) != 2) c->w = c->h = 0;
+            fclose(f);
+        }
+        c->internal = !strncmp(c->name, "eDP", 3) || !strncmp(c->name, "LVDS", 4) || !strncmp(c->name, "DSI", 3);
+    }
+    closedir(d);
+    qsort(conns, (size_t)nconns, sizeof *conns, conn_cmp);
+#endif
+}
+
+static const Connector *connector_named(const char *v)
+{
+    for (int i = 0; i < nconns; i++)
+        if (!strcasecmp(conns[i].name, v)) return &conns[i];
+    if (!strcasecmp(v, "internal"))
+        for (int i = 0; i < nconns; i++)
+            if (conns[i].internal) return &conns[i];
+    return NULL;
+}
+
+/* before SDL starts (win_init) */
+static void screen_hint(void)
+{
+    if (deterministic) return;
+    connectors_read();
+    const Connector *c = connector_named(option_str("screen", PORT_DEFAULT_SCREEN));
+    if (c && !getenv("SDL_VIDEO_DISPLAY_PRIORITY")) {
+        SDL_SetHint(SDL_HINT_VIDEO_DISPLAY_PRIORITY, c->name);
+        snprintf(hinted, sizeof hinted, "%s", c->name);
+    }
+}
+
+/* the one SDL screen whose desktop is w x h pixels, either way round (0: none, or more than one) */
+static SDL_DisplayID display_of_size(int w, int h)
+{
+    int n = 0, hits = 0;
+    SDL_DisplayID *ids = SDL_GetDisplays(&n), hit = 0;
+    for (int i = 0; ids && i < n; i++) {
+        const SDL_DisplayMode *m = SDL_GetDesktopDisplayMode(ids[i]);
+        if (!m) continue;
+        int pw = (int)lroundf(m->w * m->pixel_density), ph = (int)lroundf(m->h * m->pixel_density);
+        if ((pw == w && ph == h) || (pw == h && ph == w)) hit = ids[i], hits++;
+    }
+    SDL_free(ids);
+    return hits == 1 ? hit : 0;
+}
+
+static int holds(const char *s, const char *v)          /* (case aside) */
+{
+    size_t n = strlen(v);
+    for (; *s; s++)
+        if (!strncasecmp(s, v, n)) return 1;
+    return !n;
+}
+
+/* the one SDL screen whose name holds v (0: none, or more than one) */
+static SDL_DisplayID display_named(const char *v)
+{
+    int n = 0, hits = 0;
+    SDL_DisplayID *ids = SDL_GetDisplays(&n), hit = 0;
+    for (int i = 0; ids && i < n; i++) {
+        const char *name = SDL_GetDisplayName(ids[i]);
+        if (name && holds(name, v)) hit = ids[i], hits++;
+    }
+    SDL_free(ids);
+    return hits == 1 ? hit : 0;
+}
+
+/* the screen option asks for (0: the desktop's choice) */
+static SDL_DisplayID screen_pick(void)
+{
+    static char logged[64] = "auto";
+    const char *v = option_str("screen", PORT_DEFAULT_SCREEN);
+    if (!v || !*v || !strcasecmp(v, "auto") || deterministic || !sdl_ok || host_no_screen())
+        return 0;
+    SDL_DisplayID id = 0;
+    const char *how = "";
+    if (!strcasecmp(v, "primary")) {
+        id = SDL_GetPrimaryDisplay(), how = "the main screen";
+    } else {
+        const Connector *c = connector_named(v);
+        if (c && c->w > 0 && (id = display_of_size(c->w, c->h))) how = "its size";
+        if (!id && c && !strcmp(hinted, c->name) && (id = SDL_GetPrimaryDisplay())) how = "SDL_VIDEO_DISPLAY_PRIORITY";
+        if (!id && (id = display_named(c ? c->name : v))) how = "its name";
+        if (!id && !strcasecmp(v, "internal") && (id = display_named("Built-in"))) how = "its name";
+    }
+    if (strcmp(logged, v)) {
+        snprintf(logged, sizeof logged, "%s", v);
+        const char *name = id ? SDL_GetDisplayName(id) : NULL;
+        if (id) LOG(LOG_ALWAYS, "screen %s: SDL's \"%s\" (by %s)", v, name ? name : "?", how);
+        else LOG(LOG_ALWAYS, "screen %s: not found, the desktop's choice", v);
+    }
+    return id;
+}
+
+/* the window put on that screen, before it goes full screen (or maximized) */
+static void screen_place(void)
+{
+    SDL_DisplayID id = window ? screen_pick() : 0;
+    if (id)
+        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED_DISPLAY(id), SDL_WINDOWPOS_CENTERED_DISPLAY(id));
+}
+
+/* For a port's settings row: option screen's choices, at most max: values[i] for
+   option_set("screen", ...) then options_changed(), labels[i] to show (English: a port may show its
+   own for auto, primary and internal). "auto", "primary", "internal" when there is a built-in
+   panel, then each connected screen (Linux: its connector, with its size; elsewhere SDL's name). */
+int host_screen_choices(const char **values, const char **labels, int max)
+{
+    static char val[16][64], lab[16][80];
+    int n = 0;
+#define CHOICE(v, l) do { if (n < max && n < 16) { snprintf(val[n], sizeof val[n], "%s", v); \
+        snprintf(lab[n], sizeof lab[n], "%s", l); values[n] = val[n]; labels[n] = lab[n]; n++; } } while (0)
+    CHOICE("auto", "Desktop's choice");
+    CHOICE("primary", "Main screen");
+    connectors_read();
+    if (connector_named("internal")) CHOICE("internal", "Built-in screen");
+    if (nconns) {
+        for (int i = 0; i < nconns; i++) {
+            char l[80];
+            if (conns[i].w > 0) snprintf(l, sizeof l, "%s %dx%d", conns[i].name, conns[i].w, conns[i].h);
+            else snprintf(l, sizeof l, "%s", conns[i].name);
+            CHOICE(conns[i].name, l);
+        }
+    } else if (sdl_ok) {
+        int k = 0;
+        SDL_DisplayID *ids = SDL_GetDisplays(&k);
+        for (int i = 0; ids && i < k; i++) {
+            const char *name = SDL_GetDisplayName(ids[i]);
+            if (name && *name) CHOICE(name, name);
+        }
+        SDL_free(ids);
+    }
+#undef CHOICE
+    return n;
+}
+
 void win_init(void)
 {
     input_script_key_hook = script_key;
@@ -138,6 +326,7 @@ void win_init(void)
     /* the window's app ID (Wayland) / class (X11) matches the applications-menu entry
        (<slug>.desktop, installed by the port), so the dock shows the game's icon */
     SDL_SetAppMetadata(PORT_TITLE, NULL, PORT_SLUG);
+    screen_hint();
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS | SDL_INIT_AUDIO))
         fatal("SDL_Init: %s", SDL_GetError());
     sdl_ok = 1;
@@ -176,6 +365,7 @@ void host_window_create(const char *title, int w, int h)
                               SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
     if (!window)
         fatal("SDL_CreateWindow: %s", SDL_GetError());
+    screen_place();
 }
 
 void host_window_show(int visible)
@@ -254,6 +444,7 @@ static void desktop_probe(void)
                               SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_HIDDEN);
     if (!window)
         fatal("SDL_CreateWindow: %s", SDL_GetError());
+    screen_place();
     if (start_fullscreen) {
         SDL_SetWindowFullscreen(window, true);
         start_fullscreen = 0;
@@ -289,8 +480,9 @@ measure:
     LOG(LOG_WIN, "screen: %dx%d pixels (%s, density %.2f)", desk_w, desk_h,
         fullscreen ? "full screen" : "maximized", SDL_GetWindowPixelDensity(window));
 fallback:
-    if (desk_w < 320 || desk_h < 240) {             /* no answer: the first screen SDL lists */
-        const SDL_DisplayMode *m = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+    if (desk_w < 320 || desk_h < 240) {             /* no answer: option screen's, else the first SDL lists */
+        SDL_DisplayID sid = screen_pick();
+        const SDL_DisplayMode *m = SDL_GetDesktopDisplayMode(sid ? sid : SDL_GetPrimaryDisplay());
         desk_w = m ? (int)lroundf(m->w * m->pixel_density) : 1920;
         desk_h = m ? (int)lroundf(m->h * m->pixel_density) : 1080;
     }
@@ -359,11 +551,24 @@ void win_options(void)
 {
     if (!rumble_port)
         rumble_on = option_bool("rumble", 1);
+    /* option screen changed: the window moved there (a full-screen one too), the desktop size
+       measured again */
+    static char screen_was[64];
+    const char *sc = option_str("screen", PORT_DEFAULT_SCREEN);
+    if (window && !start_fullscreen && screen_was[0] && strcmp(screen_was, sc)) {
+        screen_place();
+        if (desk_w) {
+            desk_w = 0;
+            desktop_probe();
+        }
+    }
+    snprintf(screen_was, sizeof screen_was, "%s", sc);
     const char *d = option_str("display", NULL);
     if (!window || !d || start_fullscreen) return;
     int want = !strcasecmp(d, "fullscreen");
     if (want != fullscreen) {
         fullscreen = want;
+        if (want) screen_place();
         SDL_SetWindowFullscreen(window, want);
     }
 }
@@ -374,6 +579,7 @@ void host_display_mode(int w, int h)
     if (window && start_fullscreen) {
         start_fullscreen = 0;
         fullscreen = 1;
+        screen_place();
         SDL_SetWindowFullscreen(window, true);
         return;
     }
@@ -419,6 +625,7 @@ static void key_event(const SDL_KeyboardEvent *k, int down)
 {
     if (down && k->scancode == SDL_SCANCODE_RETURN && (k->mod & SDL_KMOD_ALT)) {
         fullscreen = !fullscreen;
+        if (fullscreen) screen_place();
         SDL_SetWindowFullscreen(window, fullscreen);
         option_set("display", fullscreen ? "fullscreen" : "window");
         options_save();

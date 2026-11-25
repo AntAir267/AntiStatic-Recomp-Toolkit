@@ -29,6 +29,9 @@ void program_screen_size(int *w, int *h);   /* the screen the program sees (user
 /* the mouse in the game's pixels (user32.c): a controller's pointer, scripted input */
 void host_mouse_at(int x, int y);
 int host_no_screen(void);                 /* SDL's offscreen driver: no real screen (win.c) */
+/* option screen's choices for a port's settings row (win.c): values for option_set("screen", v)
+   then options_changed(), labels to show; returns how many (at most max) */
+int host_screen_choices(const char **values, const char **labels, int max);
 void host_mouse_where(int *x, int *y);
 void host_mouse_button(int b, int down);   /* 0 left, 1 right, 2 middle */
 

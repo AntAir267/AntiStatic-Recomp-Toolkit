@@ -3,6 +3,24 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.59 (2026-11-24)
+
+- **Option `screen`: the screen full screen goes to** (win.c: on a PC with three
+  screens it always went to the desktop's main one). `auto` (the default, port.h
+  `PORT_DEFAULT_SCREEN`): the desktop's choice, as before; `primary`; `internal` (the built-in
+  panel: an eDP, LVDS or DSI connector); or a connector's name (`eDP-1`, `DP-13`) or part of a
+  screen's name as SDL gives it. The window is put on that screen (SDL_SetWindowPosition with
+  SDL_WINDOWPOS_CENTERED_DISPLAY) before each SDL_SetWindowFullscreen, which on Wayland is the only
+  thing that decides it (a desktop window rule doesn't hold for full screen). A connector is found
+  among SDL's screens by its preferred mode's size in /sys/class/drm (either way round, when exactly
+  one screen has it), else by SDL_VIDEO_DISPLAY_PRIORITY set to it before SDL starts, else by name;
+  not found: the desktop's choice, logged. Changed in the game's menu (`options_changed()`), the
+  window moves at once and the desktop size is measured again.
+- **`host_screen_choices(values, labels, max)`** (win.h): the choices for a port's settings row
+  (auto, primary, internal when there is a built-in panel, then each connected screen: Linux its
+  connector and size, elsewhere SDL's names).
+- Test runs (`--test`) and PCs with no screen ignore it. No regenerate, no baselines to re-record.
+
 ## v0.2.58 (2026-11-24)
 
 - **The mouse reaches the game's right and bottom edges** (win.c, from pcrecomp a67767b): the
