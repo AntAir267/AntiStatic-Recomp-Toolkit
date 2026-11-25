@@ -213,13 +213,53 @@ uint32_t msaa_render_state(uint32_t state, uint32_t value)
     return overlay ? FALSE : value;
 }
 
+#if PORT_D3D9_MSAA_KEEP_DEPTH
+/* A clear of the device's own depth buffer while no twin is bound (Nitronic Rush clears it with the
+   back buffer set, then draws its depth and scene passes into twins without clearing again) is
+   made in its twin too, with a twin's target bound for it and the game's viewport and scissor rect
+   kept; else the twin keeps its first contents and every depth-tested draw fails (only the sky,
+   drawn without depth, and the HUD showed). */
+static void clear_ms_ds(void *dev, DWORD n, const D3DRECT *rects, DWORD flags, float z, DWORD stencil)
+{
+    void *ms = NULL;
+    for (int i = 0; i < (int)(sizeof twins / sizeof *twins) && !ms; i++)
+        if (twins[i].ms) ms = twins[i].ms;
+    if (!ms) return;
+    D3DVIEWPORT9 vp;
+    RECT sc;
+    int have_vp = ((HRESULT (*)(void *, D3DVIEWPORT9 *))VT(dev)[48])(dev, &vp) >= 0;
+    int have_sc = ((HRESULT (*)(void *, RECT *))VT(dev)[76])(dev, &sc) >= 0;
+    ((HRESULT (*)(void *, DWORD, void *))VT(dev)[37])(dev, 0, ms);
+    ((HRESULT (*)(void *, void *))VT(dev)[39])(dev, ms_ds);
+    if (have_vp) ((HRESULT (*)(void *, const D3DVIEWPORT9 *))VT(dev)[47])(dev, &vp);
+    if (have_sc) ((HRESULT (*)(void *, const RECT *))VT(dev)[75])(dev, &sc);
+    ((HRESULT (*)(void *, DWORD, const D3DRECT *, DWORD, D3DCOLOR, float, DWORD))VT(dev)[43])(
+        dev, n, rects, flags & (D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL), 0, z, stencil);
+    ((HRESULT (*)(void *, DWORD, void *))VT(dev)[37])(dev, 0, host_rt);
+    ((HRESULT (*)(void *, void *))VT(dev)[39])(dev, want_ds);
+    if (have_vp) ((HRESULT (*)(void *, const D3DVIEWPORT9 *))VT(dev)[47])(dev, &vp);
+    if (have_sc) ((HRESULT (*)(void *, const RECT *))VT(dev)[75])(dev, &sc);
+}
+#endif
+
 HOSTFN(sp_IDirect3DDevice9_Clear, 7)
 {
     void *self = d3d_host(ARG(0));
     if (bound && !(ARG(3) & D3DCLEAR_TARGET) && !overlay)
         overlay_set(self, 1);
-    return (uint32_t)((HRESULT (*)(void *, DWORD, const D3DRECT *, DWORD, D3DCOLOR, float, DWORD))VT(self)[43])(
+    if (log_mask & LOG_D3D) {
+        static int n;
+        if (n++ < 400)
+            LOG(LOG_D3D, "msaa: Clear flags %x (%u rects); twin %s, depth %s", (unsigned)ARG(3), (unsigned)ARG(1),
+                bound ? "bound" : "none", !want_ds ? "none" : want_ds == dev_ds ? "the device's own" : "the game's own");
+    }
+    uint32_t r = (uint32_t)((HRESULT (*)(void *, DWORD, const D3DRECT *, DWORD, D3DCOLOR, float, DWORD))VT(self)[43])(
         self, ARG(1), (const D3DRECT *)(uintptr_t)ARG(2), ARG(3), ARG(4), d3d_argf(c, 5), ARG(6));
+#if PORT_D3D9_MSAA_KEEP_DEPTH
+    if (level && ms_ds && !bound && host_rt && want_ds == dev_ds && (ARG(3) & (D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL)))
+        clear_ms_ds(self, ARG(1), (const D3DRECT *)(uintptr_t)ARG(2), ARG(3), d3d_argf(c, 5), ARG(6));
+#endif
+    return r;
 }
 
 /* --log d3d: what the game binds, at each change of target or depth surface (the first 400): sizes,

@@ -3,6 +3,17 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.57 (2026-11-24)
+
+- **`PORT_D3D9_MSAA_KEEP_DEPTH 1` keeps the depth buffer's twin cleared**: a clear of the device's
+  own depth buffer while no twin is bound (Nitronic Rush clears it with the back buffer set, then
+  draws its depth and scene passes into twins without clearing again) is made in its twin too. In
+  v0.2.56 the twin was never cleared and every depth-tested draw failed (Nitronic Rush at 4x showed
+  only its sky and HUD). Settings off: nothing changes.
+- **`--log d3d` traces clears** while antialiasing is on (the first 400): their flags, rects, and
+  whether a twin and which depth buffer were bound.
+- No regenerate, no baselines to re-record (antialiasing off is untouched).
+
 ## v0.2.56 (2026-11-24)
 
 - **`PORT_D3D9_MSAA_KEEP_DEPTH 1`**: antialiasing for a game that sets its render targets and keeps

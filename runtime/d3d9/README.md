@@ -53,7 +53,7 @@ disassembler, the replacement-shader table), `d3dinv_report.py` (the inventory s
 | Setting | Default | What |
 | --- | --- | --- |
 | `PORT_D3D9_ANTIALIASING` | `"off"` | option `antialiasing`'s default (`off`, `2x`, `4x`, `8x`; d3d9_msaa.c). etm-native: `"4x"` |
-| `PORT_D3D9_MSAA_KEEP_DEPTH` | `0` | 1: a target of the device depth buffer's size set while that buffer stays bound gets its twin then (a game that never sets its depth buffer again, Nitronic Rush); off for a game that sets a target and then a depth buffer of its own |
+| `PORT_D3D9_MSAA_KEEP_DEPTH` | `0` | 1: a target of the device depth buffer's size set while that buffer stays bound gets its twin then (a game that never sets its depth buffer again, Nitronic Rush), and a clear of that buffer while no twin is bound is made in its twin too; off for a game that sets a target and then a depth buffer of its own |
 | `PORT_D3D9_ANISOTROPIC` | `"16"` | option `anisotropic`'s default (`off`, `2`, `4`, `8`, `16`: DXVK's d3d9.samplerAnisotropy) |
 | `PORT_D3D9_SHADOW_FILTER` | `"original"` | option `shadow_filter`'s default (`original`, `3`, `5`, `7`; needs DXVK's soft-shadows patch) |
 | `PORT_D3D9_KEEP_ASPECT` | 0 | 1: a back buffer of another shape than the window is shown centred, black bars, not stretched (Stranglehold) |
