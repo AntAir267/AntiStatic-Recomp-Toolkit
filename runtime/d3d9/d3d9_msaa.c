@@ -219,6 +219,36 @@ HOSTFN(sp_IDirect3DDevice9_Clear, 7)
         self, ARG(1), (const D3DRECT *)(uintptr_t)ARG(2), ARG(3), ARG(4), d3d_argf(c, 5), ARG(6));
 }
 
+/* --log d3d: what the game binds, at each change of target or depth surface (the first 400): sizes,
+   formats, usage, whether the depth surface is the device's own and the target a texture's, and
+   which twin went to the device. For a game where antialiasing never engages (Nitronic Rush) */
+static void bind_trace(const char *what, void *rt, void *ds)
+{
+    static int n;
+    static void *last_rt, *last_ds;
+    if (!(log_mask & LOG_D3D) || n >= 400 || (rt == last_rt && ds == last_ds))
+        return;
+    n++;
+    last_rt = rt;
+    last_ds = ds;
+    char a[96] = "none", b[96] = "none";
+    D3DSURFACE_DESC d;
+    if (rt) {
+        desc_of(rt, &d);
+        void *tex = NULL;
+        int is_tex = ((HRESULT (*)(void *, const GUID *, void **))VT(rt)[11])(rt, &IID_IDirect3DTexture9, &tex) >= 0 && tex;
+        if (tex) REL(tex);
+        snprintf(a, sizeof a, "%ux%u fmt %u usage %x ms %u%s%s", d.Width, d.Height, d.Format, (unsigned)d.Usage,
+                 d.MultiSampleType, rt == dev_bb ? " (the back buffer)" : "", is_tex ? " (a texture's)" : "");
+    }
+    if (ds) {
+        desc_of(ds, &d);
+        snprintf(b, sizeof b, "%ux%u fmt %u ms %u%s", d.Width, d.Height, d.Format, d.MultiSampleType,
+                 ds == dev_ds ? " (the device's own)" : " (the game's own)");
+    }
+    LOG(LOG_D3D, "msaa: %s: target %s, depth %s; twin %s", what, a, b, bound ? "bound" : "none");
+}
+
 static void want(void **slot, void *o)
 {
     if (o) ADDREF(o);
@@ -234,7 +264,9 @@ HOSTFN(sp_IDirect3DDevice9_SetRenderTarget, 3)
         return (uint32_t)((HRESULT (*)(void *, DWORD, void *))VT(self)[37])(self, ARG(1), rt);
     want(&want_rt, rt);
     /* (the same target again, as the HUD does for each of its parts: its twin kept, unresolved) */
-    return (uint32_t)bind(self, bound && bound->orig == rt && want_ds == dev_ds ? bound : NULL, 1);
+    uint32_t r = (uint32_t)bind(self, bound && bound->orig == rt && want_ds == dev_ds ? bound : NULL, 1);
+    bind_trace("SetRenderTarget", want_rt, want_ds);
+    return r;
 }
 
 HOSTFN(sp_IDirect3DDevice9_SetDepthStencilSurface, 2)
@@ -244,9 +276,13 @@ HOSTFN(sp_IDirect3DDevice9_SetDepthStencilSurface, 2)
     if (!level)
         return (uint32_t)((HRESULT (*)(void *, void *))VT(self)[39])(self, ds);
     want(&want_ds, ds);
-    if (!want_rt)                               /* (no target set yet: the device's own is bound) */
+    if (!want_rt) {                             /* (no target set yet: the device's own is bound) */
+        bind_trace("SetDepthStencilSurface (no target set)", NULL, want_ds);
         return (uint32_t)((HRESULT (*)(void *, void *))VT(self)[39])(self, want_ds);
-    return (uint32_t)bind(self, want_ds && want_ds == dev_ds ? twin_of(self, want_rt) : NULL, 0);
+    }
+    uint32_t r = (uint32_t)bind(self, want_ds && want_ds == dev_ds ? twin_of(self, want_rt) : NULL, 0);
+    bind_trace("SetDepthStencilSurface", want_rt, want_ds);
+    return r;
 }
 
 HOSTFN(sp_IDirect3DDevice9_GetRenderTarget, 3)

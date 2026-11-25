@@ -3,6 +3,15 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.55 (2026-11-24)
+
+- **`--log d3d` traces what a game binds while antialiasing is on** (d3d9_msaa.c): at each change of
+  render target or depth surface, the first 400, their sizes, formats and usage, whether the depth
+  surface is the device's own or the game's and the target a texture's, and whether a twin went to
+  the device. For a game where `antialiasing` never engages (Nitronic Rush): the bridge twins only
+  targets drawn with the device's own depth buffer, chosen when that buffer is set.
+- No regenerate.
+
 ## v0.2.54 (2026-11-24)
 
 - **Caught exceptions on Windows builds** (Clang, Zig's toolchain): a translated function's body
