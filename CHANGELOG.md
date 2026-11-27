@@ -3,6 +3,34 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.61 (2026-11-26)
+
+- **The toolkit's own Vulkan renderer for Direct3D 8**: `runtime/d3d8/vk_d3d8.c` (DXVK 3.1.1's d3d8 front end
+  in C) and `vk_capdump.c` (measuring aids for either renderer) over `runtime/vk9`, our Direct3D 9 on Vulkan
+  1.3 (`vk_core.c`, `vk_d3d9.c`, `vk_cs.c` recording on its own thread, `vk_spv.c` the game's shaders to SPIR-V
+  at run time, the fixed-function and gamma shaders), with `tools/vk9/plist2h.py` and `vk_plist.py` for a
+  port's built-in pipeline list (an optional `vk_plist.h` on its include path). Merged from the two D3D8
+  ports' copies onto the newer one: pipelines made ahead as their shaders come, colour blend states dynamic
+  (`VK_DYN_BLEND=1`), the fixed-function block computed by part, lights of any index, the swapchain's sRGB
+  views for the gamma pass, the swapchain remade at any window size change and kept through a lost surface,
+  DXVK's depth formats by vendor, texm3x3pad/tex/spec/vspec, recording on its own thread; and from the other
+  copy its Windows pieces (`vulkan-1.dll`, no sampling profiler) and `DRAWSHOT_XF`. Environment names through
+  `port_getenv`; the application name is `PORT_TITLE` / `PORT_SLUG`. What a port compiles:
+  `runtime/vk9/README.md`. `tests/vk9/build.sh` builds it with no game (Linux, and Windows with Zig).
+- **The D3D8 bridge** gives the renderer the test card's vendor (`d3d8_card_vendor()`), takes
+  `PORT_D3D8_RENDERER` as option `renderer`'s default (`"dxvk"` unless set) and `<PORT_ENV>_RENDERER=vulkan|dxvk`
+  as a test override.
+- Checked: the port the renderer came from runs its 22 routes the same on it (A/B, on NVIDIA and lavapipe,
+  validation clean; frames byte-identical to its own copy's on 19, the other 3 differing only by v0.2.59's new
+  settings row in that port's memory). Penguins! runs its route to the end on it; its
+  frames are the same as under its own older copy, which are black for that game (a known open issue there:
+  its draws are skipped as having no vertex declaration).
+- No regenerate. Ports on DXVK: nothing changes. A port moving from its own copy of this renderer drops its
+  `runtime/vk_*.c`, `vk.h`, `vk_abi.h` and `shaders/`, adds the include paths, and renames nothing but its
+  environment variables' prefix (already `<PORT_ENV>_`); its saved SPIR-V is made again once (`VK_SPV_BUILD`
+  changes with the file).
+
+
 ## v0.2.60 (2026-11-26)
 
 - **The register audit compares more** (runtime/rewrite/audit.c, `<PORT_ENV>_AUDIT=1`; asked for by a

@@ -429,11 +429,23 @@ static const TestCard *test_card(void)
     return card;
 }
 
+/* the vendor DXVK's format table decides by (D3D9Adapter::GetVendorId: d3d9.customVendorId, the test card's
+   under --test, else the GPU's), for the toolkit's Vulkan renderer's same answers (runtime/vk9/vk_d3d9.c
+   CheckDeviceFormat): 0 the GPU's */
+uint32_t d3d8_card_vendor(void)
+{
+    const TestCard *tc = test_card();
+    return tc ? tc->vendor : 0;
+}
+
+#ifndef PORT_D3D8_RENDERER
+#define PORT_D3D8_RENDERER "dxvk"     /* option renderer's default: "dxvk" or "vulkan" */
+#endif
 static void *dxvk;
 static void *(*dxvk_create8)(UINT);
 
-/* a port's own Vulkan renderer for D3D8 (its vk_d3d8.c, option renderer = vulkan), when it has one:
-   weak defaults here, so a port without one runs on DXVK */
+/* the toolkit's own Vulkan renderer for D3D8 (runtime/d3d8/vk_d3d8.c on runtime/vk9, option renderer = vulkan)
+   when the port links it in: weak defaults here, so a port without it runs on DXVK */
 __attribute__((weak)) void *vk_create8(void) { return NULL; }                  /* its IDirect3D8 */
 __attribute__((weak)) void vk8_buf_host(void *buf, void *host) { (void)buf; (void)host; }   /* a buffer's host copy */
 static int vk_renderer;                 /* our own renderer is the one running */
@@ -447,12 +459,17 @@ API(D3D8, Direct3DCreate8, 1)
         inventory_kept = 1;
         runtime_at_exit(d3d_inventory_write);
     }
-    /* option renderer = dxvk (the default) | vulkan (a port's own Vulkan renderer, vk_d3d8.c, when it has one,
-       linked in): the same COM interfaces, so everything here calls either the same way; it falls
-       back to DXVK if it cannot start */
+    /* option renderer = dxvk | vulkan (the toolkit's Vulkan renderer, vk_d3d8.c, when the port links it in;
+       PORT_D3D8_RENDERER is the default, "dxvk" unless the port says): the same COM interfaces, so everything
+       here calls either the same way; ours falls back to DXVK, logged, if it cannot start. TEST AID
+       <PORT_ENV>_RENDERER=vulkan|dxvk: the renderer without the option, so the two renderers' test runs have
+       the same options (an options page that shows the option keeps its text in the program's memory: runs
+       of the two renderers would otherwise differ there from the start) */
     static int vulkan = -1;
-    if (vulkan < 0)
-        vulkan = !strcasecmp(option_str("renderer", "dxvk"), "vulkan");
+    if (vulkan < 0) {
+        const char *force = port_getenv("RENDERER");
+        vulkan = !strcasecmp(force && *force ? force : option_str("renderer", PORT_D3D8_RENDERER), "vulkan");
+    }
     if (vulkan) {
         void *d = vk_create8();
         if (d) {

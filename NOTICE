@@ -27,6 +27,13 @@ third_party/dxvk
     and its dxbc-spirv subproject (MIT, Copyright (c) 2025 Philip Rebohle), under those licences;
     DXVK's own source is not included (third_party/dxvk/README.md).
 
+runtime/vk9, runtime/d3d8/vk_d3d8.c
+    our own Vulkan renderer follows DXVK 3.1.1 (zlib/libpng licence, the copyright lines above):
+    shaders/ff.vert and ff.frag are adapted from its fixed-function shaders (marked ALTERED SOURCE,
+    with DXVK's notice), vk_d3d8.c rewrites its d3d8 front end in C, vk_spv.c converts shaders as its
+    dxbc-spirv does (MIT, above) and shaders/gamma.frag applies ramps as its presenter: altered
+    versions, not DXVK's own source. DXVK's licence text in full is in runtime/vk9/shaders/ff.frag.
+
 third_party/stb_vorbis
     stb_vorbis v1.22 by Sean Barrett (https://github.com/nothings/stb), MIT or public domain
     at the user's choice (third_party/stb_vorbis/LICENSE.txt); taken under the public-domain
