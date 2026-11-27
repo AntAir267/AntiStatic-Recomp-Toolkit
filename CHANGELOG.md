@@ -3,6 +3,19 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.62 (2026-11-26)
+
+- **Our Vulkan renderer's Reset keeps what DXVK's keeps** (`runtime/vk9/vk_d3d9.c`): the vertex declaration
+  (an FVF's too), the shaders and their constants, the material, the lights and the transforms; the render,
+  texture stage and sampler states go back to their defaults and the textures, streams, indices and clip
+  planes are let go, as DXVK 3.1.1's `ResetState`. It had cleared everything. A Direct3D 8 game that sets the
+  same FVF again after a Reset then had no declaration (the d3d8 front end, like DXVK's, passes
+  `SetVertexShader` on only when the handle changes), and every later draw was skipped: Penguins! drew black
+  under `renderer = vulkan`. Checked: its route skips no draw, its memory hashes equal DXVK's at all 149
+  checkpoints (v0.2.61's parted at the 78th), its shots are pixel-identical to DXVK's.
+- **Fixes a bug in released builds**: any port on v0.2.61's renderer whose game Resets its device. A game
+  that never Resets runs exactly as on v0.2.61. No regenerate.
+
 ## v0.2.61 (2026-11-26)
 
 - **The toolkit's own Vulkan renderer for Direct3D 8**: `runtime/d3d8/vk_d3d8.c` (DXVK 3.1.1's d3d8 front end

@@ -3444,12 +3444,49 @@ static int make_buffers(const D3DPRESENT_PARAMETERS *pp)
     return 1;
 }
 
-static void drop_buffers(void)
+/* RESET keeps what DXVK 3.1.1's D3D9DeviceEx::ResetState keeps: the vertex declaration (an FVF's too), the
+   shaders and their constants, the material, the lights and the transforms. It sets the render, texture stage
+   and sampler states back to their defaults and lets go of the textures, streams, indices and clip planes
+   (rs_defaults), as ours did with everything. A Direct3D 8 program that sets the same FVF again after a Reset
+   relies on it: DXVK's d3d8 front end (and vk_d3d8.c) passes SetVertexShader on only when the handle changes,
+   so with the declaration gone every later draw had none and was skipped (Penguins! Resets its device three
+   times at the start: one pipeline in its whole route, black frames. Kept: no draw skipped, its route's memory
+   hashes equal to DXVK's at all 149 checkpoints and its shots pixel-identical [verified: an NVIDIA desktop PC, 2026-11-26]). */
+static St reset_kept;
+static D3DMATRIX reset_xforms[512];
+static void reset_keep(void)
+{
+    reset_kept.decl = S.decl, reset_kept.fvf = S.fvf, reset_kept.vs = S.vs, reset_kept.ps = S.ps;
+    memcpy(reset_kept.vsc, S.vsc, sizeof S.vsc), memcpy(reset_kept.vsi, S.vsi, sizeof S.vsi), memcpy(reset_kept.vsb, S.vsb, sizeof S.vsb);
+    memcpy(reset_kept.psc, S.psc, sizeof S.psc), memcpy(reset_kept.psi, S.psi, sizeof S.psi), memcpy(reset_kept.psb, S.psb, sizeof S.psb);
+    reset_kept.mat = S.mat;
+    memcpy(reset_kept.light, S.light, sizeof S.light);
+    memcpy(reset_kept.light_on, S.light_on, sizeof S.light_on), memcpy(reset_kept.light_set, S.light_set, sizeof S.light_set);
+    memcpy(reset_kept.light_bits, S.light_bits, sizeof S.light_bits);
+    memcpy(reset_xforms, xforms, sizeof xforms);
+}
+static void reset_restore(int bindings_only)
+{
+    S.decl = reset_kept.decl, S.fvf = reset_kept.fvf, S.vs = reset_kept.vs, S.ps = reset_kept.ps;
+    if (bindings_only) return;
+    memcpy(S.vsc, reset_kept.vsc, sizeof S.vsc), memcpy(S.vsi, reset_kept.vsi, sizeof S.vsi), memcpy(S.vsb, reset_kept.vsb, sizeof S.vsb);
+    memcpy(S.psc, reset_kept.psc, sizeof S.psc), memcpy(S.psi, reset_kept.psi, sizeof S.psi), memcpy(S.psb, reset_kept.psb, sizeof S.psb);
+    S.mat = reset_kept.mat;
+    memcpy(S.light, reset_kept.light, sizeof S.light);
+    memcpy(S.light_on, reset_kept.light_on, sizeof S.light_on), memcpy(S.light_set, reset_kept.light_set, sizeof S.light_set);
+    memcpy(S.light_bits, reset_kept.light_bits, sizeof S.light_bits);
+    memcpy(xforms, reset_xforms, sizeof xforms);
+    DIRTY_ALL();
+}
+
+static void drop_buffers(int reset)
 {
     end_pass();
     for (int i = 0; i < 4; i++) set_rt(i, NULL);
     set_ds(NULL);
+    if (reset) reset_keep();
     memset(&S, 0, sizeof S);                /* (the slots hold no references) */
+    if (reset) reset_restore(1);            /* (the kept declaration and shaders stay bound: not swept) */
     zombies_sweep();
     if (backbuf) { iunref(&backbuf->o); backbuf = NULL; }
     if (autods) { iunref(&autods->o); autods = NULL; }
@@ -3459,12 +3496,14 @@ static HRESULT dev_Reset(void *This, D3DPRESENT_PARAMETERS *pp)
 {
     (void)This;
     if (!pp) return D3DERR_INVALIDCALL;
-    drop_buffers();
+    drop_buffers(1);
     if (R.cb) vk_submit(1);
     B.cb = VK_NULL_HANDLE;
     sc_frame = 0;                           /* (the new back buffer: drawn into the image again only if it fits) */
     vkDeviceWaitIdle(R.dev);
-    if (!make_buffers(pp)) return D3DERR_INVALIDCALL;
+    int ok = make_buffers(pp);              /* (its rs_defaults: the defaults, then what Reset keeps put back) */
+    reset_restore(0);
+    if (!ok) return D3DERR_INVALIDCALL;
     return D3D_OK;
 }
 
