@@ -175,6 +175,37 @@ if grep -q 'REACHED' $B/audit_slots_none.txt 2>/dev/null && ! grep -q 'DIFF\|NOC
 else
     echo "stub game (register audit, argument slots): FAILED ($B/audit_slots_none.txt, $B/audit_slots_slot.txt, $B/audit_plain_slot.txt; result.txt ok=$res_ok)"; fail=1
 fi
+# the SSE registers (always compared): the xmm mutant shows
+aud xmm xmm
+if grep -q ' DIFF .* xmm3 T=' $B/audit_xmm.txt 2>/dev/null; then
+    echo "stub game (register audit, xmm): ok, the mutant's xmm3 found"
+else
+    echo "stub game (register audit, xmm): FAILED ($B/audit_xmm.txt)"; fail=1
+fi
+# the memory written (STUB_AUDIT_MEM=1, soft-dirty pages): the clean rewrite the same and the run's
+# result unchanged; the mem mutant's stray write found with AUDIT_MEM and only with it
+aud mem_none "" STUB_AUDIT_MEM=1
+cmp -s $B/user/result.txt tests/stubgame/expected.txt && res_ok=1 || res_ok=0
+aud mem_mem mem STUB_AUDIT_MEM=1
+aud plain_mem mem
+if grep -q 'REACHED' $B/audit_mem_none.txt 2>/dev/null && ! grep -q 'DIFF\|NOCHILD\|not compared' $B/audit_mem_none.txt &&
+   [ $res_ok = 1 ] && grep -q ' DIFF .* mem [0-9a-f]*\.\.' $B/audit_mem_mem.txt 2>/dev/null &&
+   grep -q 'REACHED' $B/audit_plain_mem.txt 2>/dev/null && ! grep -q 'DIFF' $B/audit_plain_mem.txt; then
+    echo "stub game (register audit, memory): ok, same, and the mutant's write found only with AUDIT_MEM"
+else
+    echo "stub game (register audit, memory): FAILED ($B/audit_mem_none.txt, $B/audit_mem_mem.txt, $B/audit_plain_mem.txt; result.txt ok=$res_ok)"; fail=1
+fi
+# taint runs (STUB_AUDIT_TAINT, its first argument tainted): the clean rewrite the same under a NaN,
+# memory too; the nan mutant differs there, and nowhere on the game's own input
+aud taint_none "" STUB_AUDIT_TAINT=$mix STUB_AUDIT_TAINT_ARGS=$mix:a0 STUB_AUDIT_MEM=1
+cmp -s $B/user/result.txt tests/stubgame/expected.txt && res_ok=1 || res_ok=0
+aud taint_nan nan STUB_AUDIT_TAINT=$mix STUB_AUDIT_TAINT_ARGS=$mix:a0
+if grep -q 'TAINT n=1 v=nan same' $B/audit_taint_none.txt 2>/dev/null && ! grep -q ' DIFF \|NOCHILD\|nochild' $B/audit_taint_none.txt &&
+   [ $res_ok = 1 ] && grep -q 'TAINT n=1 v=nan eax T=' $B/audit_taint_nan.txt 2>/dev/null && ! grep -q ' DIFF ' $B/audit_taint_nan.txt; then
+    echo "stub game (register audit, taint): ok, same under a NaN, and the NaN-only mutant found"
+else
+    echo "stub game (register audit, taint): FAILED ($B/audit_taint_none.txt, $B/audit_taint_nan.txt; result.txt ok=$res_ok)"; fail=1
+fi
 # STUB_AUDIT_SKIP: the ebx mutant left out of the audit is not reported
 aud skip_ebx ebx STUB_AUDIT_SKIP=$mix
 if grep -q "^# $mix not audited (AUDIT_SKIP)" $B/audit_skip_ebx.txt 2>/dev/null && ! grep -q 'REACHED\|DIFF' $B/audit_skip_ebx.txt; then

@@ -9,7 +9,8 @@
    by STUB_MIX_MUTANT, which the checks must catch: "1" a wrong result for an input the stub game
    itself never gives (only fncheck reaches it), "ebx" ebx left changed (the register audit),
    "slot" its second argument's slot scribbled (the audit's argument slots, AUDIT_SLOTS and
-   AUDIT_LOG). */
+   AUDIT_LOG), "xmm" an SSE register left changed, "mem" a stray write into the caller's frame
+   (AUDIT_MEM), "nan" a wrong result only for a NaN first argument (AUDIT_TAINT). */
 #include <string.h>
 #include "rewrite.h"
 #include "fncheck.h"
@@ -30,6 +31,16 @@ static int mix(CPU *c)
         c->ebx ^= 0x100;                                      /* (the bug only the audit sees) */
     if (m && !strcmp(m, "slot"))
         W32(entry + 8, b ^ 0x10);                             /* (b's slot: the original leaves it) */
+    if (m && !strcmp(m, "xmm")) {                             /* (an SSE leftover: the audit compares xmm) */
+        uint32_t q[4];
+        memcpy(q, &c->xmm[3], 16);
+        q[0] ^= 1;
+        memcpy(&c->xmm[3], q, 16);
+    }
+    if (m && !strcmp(m, "mem"))                               /* (a stray write into the caller's frame, */
+        W32(entry + 0x100, R32(entry + 0x100) ^ 1);           /*  past the slots: AUDIT_MEM's) */
+    if (m && !strcmp(m, "nan") && (a & 0x7fc00000u) == 0x7fc00000u)
+        h++;                                                  /* (only a NaN input shows it: AUDIT_TAINT's) */
     return decomp_ret(c, entry, h, 0);                        /* cdecl: the caller pops */
 }
 REGISTER_MIX(mix);

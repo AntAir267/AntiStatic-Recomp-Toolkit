@@ -555,6 +555,13 @@ def main():
         for e in sorted(funcs):
             fh.write('    {0x%08xu, %s},\n' % (e, prog.fname(e)))
         fh.write('};\nconst int func_count = %d;\n\n' % len(funcs))
+        # the functions whose callers read flags after them (Program.ret_flags; CF 1, PF 2, AF 4, ZF 8,
+        # SF 16, OF 32): the register audit compares those flags (runtime/rewrite/audit.c)
+        fh.write('const uint32_t flags_out_table[] = {\n')
+        for e, m in sorted(prog.ret_flags.items()):
+            if m:
+                fh.write('    0x%08xu, %du,\n' % (e, m))
+        fh.write('    0, 0\n};\n\n')
         fh.write('/* imports the runtime provides */\nconst ImportEntry import_table[] = {\n')
         for va, (dll, name) in sorted(host.items()):
             sym = import_symbol(dll, name)

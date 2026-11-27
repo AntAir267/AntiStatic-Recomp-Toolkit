@@ -351,8 +351,9 @@ The stub game's test has a worked example (tests/stubgame/fncheck.spec, port/rew
 `<PORT_ENV>_AUDIT=1` puts every rewrite behind a wrapper (runtime/rewrite/audit.c). On sampled calls
 of an ordinary run (each rewrite's first six, the first two from each return address, then 1, 2, 4,
 8... up to 60) it forks; the child runs the translation from the same state, the parent then the
-rewrite, and eax, ebx, esi, edi, ebp, esp, the return address, the direction flag and the x87 stack
-are compared. Differences go to `<PORT_ENV>_AUDIT_OUT` (default `audit.txt` in the user folder),
+rewrite, and eax, ebx, esi, edi, ebp, esp, the return address, the direction flag, the x87 stack,
+the SSE and MMX registers and MXCSR are compared, and the flags for a function whose callers read
+them after it (below). Differences go to `<PORT_ENV>_AUDIT_OUT` (default `audit.txt` in the user folder),
 one line each (`ADDR DIFF ... eax T=translation R=rewrite`); `<PORT_ENV>_AUDIT_ONLY=addr,...` limits
 it. Run it on every route: it makes "does my rewrite leave the registers as the original" a route
 run with no spec.
@@ -377,6 +378,40 @@ N). Not together with `--fncheck`. As with fncheck, run under lavapipe where the
 function leaves them (MSVC uses them as scratch; fncheck compares them too): each slot the call popped
 (a callee-pop function's own, up to 12), a cdecl function's first 6, and the return address slot.
 A difference reads ` slot1 T=.. R=.. (in ..)` (` retslot` for the return address slot).
+
+**SSE, MMX and flags.** The translation keeps xmm0-7 and mm0-7 in the CPU record at every call and
+return, so a caller reads what its callee left there: each is compared bit for bit (NaN payloads and
+signed zeros count), with MXCSR, as ` xmm3 T=hi:..:lo R=..`. A compiled caller reads them only
+where a custom convention passes values in them, so judge such a line by its callers. The flags are
+compared only for a function the translator found its callers read flags after (CRT maths helpers:
+the `flags_out_table` it writes into table.c from v0.2.60; translated before that, the report says
+flags aren't compared): ` flags T=.. R=.. (its callers read ..)`.
+
+**Memory written.** `<PORT_ENV>_AUDIT_MEM=1` also compares the guest memory each side wrote: the
+image, the DLLs, every region but other threads' stacks, and the calling thread's stack. The kernel's
+soft-dirty page bits say which pages each wrote (the child clears them right after the fork, the
+parent before the rewrite); the union of the two lists is compared page by page, the child's copy
+read with process_vm_readv while it waits. A difference reads ` mem 02100044..02100047 T=.. R=..`
+(the first and last differing bytes on that page, the dword at the first), up to 8 pages then a
+count; the dead stack below the call (each side's own frames) is only counted, as ` (and N
+dead-stack pages)`, on a line with other differences; ` regions T=.. R=..` when they allocated
+differently. Without soft-dirty bits (a kernel without CONFIG_MEM_SOFT_DIRTY) the report says
+memory isn't compared. An audit inside a rewrite whose memory is being compared compares registers
+only (its own page bits would wipe the outer one's). Under `--test` only the game's thread runs, so
+nothing else writes guest memory while the rewrite runs; in an ordinary run another thread's write
+can show as a difference.
+
+**Taint runs.** `<PORT_ENV>_AUDIT_TAINT=all` (or `addr,...`) adds, on each tainted function's first
+four audited calls, a run of the translation and one of the rewrite, each in a child of its own and
+both from the same state with the same inputs replaced (the parent runs neither, so its run goes on
+as it was): every xmm lane, and the float inputs `<PORT_ENV>_AUDIT_TAINT_ARGS` names, as
+`addr:a0,t8,p1+4;addr:...` (`aN` the N-th stack argument from 0, `tN` the float at this+N (ecx), `pN+M`
+the float at [argument N]+M). The four runs set quiet NaNs with payloads all their own, negative
+NaNs, minus zero, and the smallest denormals: a rewrite that multiplies in another operand order, or
+handles a zero or NaN otherwise, differs only on such inputs, which routes seldom give. The result is
+one line each: `ADDR TAINT n=.. v=nan same`, or `v=nan` with the differences (registers, and memory
+with AUDIT_MEM), or `nochild T|R why=..`. Only 4-byte floats are set; doubles and the x87 stack
+are not.
 
 **Leaving functions out.** `<PORT_ENV>_AUDIT_SKIP=addr,...` (hex), and the port's own list as
 `#define PORT_AUDIT_SKIP "401230,4015a0"` in port.h, are never audited; nor is the program's entry

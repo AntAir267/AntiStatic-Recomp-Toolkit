@@ -27,6 +27,16 @@
                                             why=timeout progress=N (still working at 2 s; N counts its
                                             calls through wrappers and pointers), why=ended (it crashed
                                             or hit a fatal error): that rewrite is not audited again
+   <PORT_ENV>_AUDIT_MEM=1            also the guest memory each side wrote (soft-dirty pages: the image,
+                                     DLLs, regions, the calling thread's stack), " mem A..B T=.. R=.."
+   <PORT_ENV>_AUDIT_TAINT=all|addr,addr   on each such function's first four audited calls, the
+                                     translation and the rewrite each in a child of its own with NaN,
+                                     -NaN, -0 or denormal inputs (every xmm lane and
+                                     <PORT_ENV>_AUDIT_TAINT_ARGS "addr:a0,t8,p1+4;...": the N-th stack
+                                     argument, the float at this+N, at [argument N]+M):
+                                     "ADDR TAINT n=.. v=nan same|<differences>|nochild T|R why=.."
+   (always compared too: xmm0-7, mm0-7 and MXCSR bit for bit, and the flags of a function whose callers
+   read them, by the translation's flags_out_table)
    <PORT_ENV>_AUDIT_ONLY=addr,addr   only those (hex)
    <PORT_ENV>_AUDIT_SKIP=addr,addr   not those (with the port's PORT_AUDIT_SKIP "addr,addr" in port.h
                                      and the program's entry point, which never returns)
@@ -86,6 +96,7 @@ int (*rewrite_audit_wrap(const DecompEntry *d))(CPU *)
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/uio.h>
 #include <signal.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -109,6 +120,9 @@ int (*rewrite_audit_wrap(const DecompEntry *d))(CPU *)
 #endif
 
 extern int fncheck_solo;                /* sync.c: a forked check child has one thread; no turns */
+/* the translation's table (table.c, from AntiStatic v0.2.60): {function, flags its callers read after
+   it (CF 1, PF 2, AF 4, ZF 8, SF 16, OF 32)} pairs, ending {0, 0}; absent before: flags not compared */
+extern const uint32_t flags_out_table[] __attribute__((weak));
 
 #define AUDIT_MAX 8192
 #define NSLOT 13                        /* the return address slot and 12 argument slots */
@@ -120,16 +134,32 @@ typedef struct {
     uint32_t rets[32];
     int retn[32], nrets;
     Log *log;                           /* (the two-run log's record) */
+    uint32_t fmask;                     /* EFLAGS bits its callers read after it (the translation's table) */
+    int taint, tainted, nti;            /* AUDIT_TAINT: tainted, how many taint runs so far, items */
+    struct { char kind; int n; uint32_t off; } ti[16];  /* a: stack argument n; t: float at this+off; p: at [argument n]+off */
 } Ent;
 static Ent ents[AUDIT_MAX];
 static int nents, in_child, child_idx = -1;
 /* progress: the child's calls through a wrapper or an indirect call, so the parent can tell a child
    still working from one waiting on something no thread of the child will ever release */
-typedef struct { uint32_t r[8], ret, ftop, df, slot[NSLOT]; uint8_t st[8][10]; int done, sys, noiso; volatile uint32_t progress; } Out;
-static Out *shm;
+typedef struct {
+    uint32_t r[8], ret, ftop, df, slot[NSLOT], mxcsr, eflags, nregions;
+    uint8_t st[8][10], xmm[8][16];
+    uint64_t mm[8];
+    volatile int done;
+    int sys, noiso;
+    volatile uint32_t progress;
+} Out;
+static Out *shm, *shm_base;             /* shm_base[0] the audit's child, [1] and [2] a taint run's two */
 static FILE *outf;
 static int state = -1;                  /* -1 not read yet, 0 off, 1 on */
 static int slots_on, isolate = 1;
+/* AUDIT_MEM=1: the memory each side wrote, compared too (the kernel's soft-dirty bits say which pages) */
+#define PAGE 4096u
+#define MAXDIRTY (1u << 20)
+static int mem_on, mem_busy, child_mem, pm_fd = -1;
+static uint32_t *dirty[3], *dirty_mine; /* [0] count, [1] overflow, then the pages' addresses */
+static int taint_all;                   /* AUDIT_TAINT=all */
 static int logmode, log_translation;    /* the two-run log: 1 the translation's run, 2 the rewrites' */
 static char logpath[1100];
 
@@ -435,6 +465,313 @@ static int child_blocked(pid_t pid)
     return nr < 0 ? 999 : nr;
 }
 
+/* ------------------------------------------------------------------ what a call left */
+static void out_fill(Out *o, CPU *c, uint32_t entry)
+{
+    uint32_t *rr = &c->eax;
+    for (int k = 0; k < 8; k++) o->r[k] = rr[k];
+    o->ret = c->ret; o->ftop = c->ftop; o->df = c->df;
+    for (int k = 0; k < 8; k++) memcpy(o->st[k], &c->st[k], 10);
+    for (int k = 0; k < NSLOT; k++) o->slot[k] = R32(entry + 4u * (uint32_t)k);
+    memcpy(o->xmm, c->xmm, sizeof o->xmm);
+    memcpy(o->mm, c->mm, sizeof o->mm);
+    o->mxcsr = c->mxcsr;
+    o->eflags = c->eflags;
+}
+
+#define ADD(...) do { if (len < cap - 96) len += snprintf(buf + len, (size_t)(cap - len), __VA_ARGS__); } while (0)
+/* what t (the translation) and r (the rewrite) left that differs, appended to buf */
+static int reg_diff(const Ent *e, const Out *t, const Out *r, uint32_t ftop_in, uint32_t entry, const uint32_t *pre,
+                    char *buf, int len, int cap)
+{
+    static const char *nm[8] = {"eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi"};
+    for (int k = 0; k < 8; k++)
+        if (k != 1 && k != 2 && t->r[k] != r->r[k]) ADD(" %s T=%08x R=%08x", nm[k], t->r[k], r->r[k]);
+    if (t->ret != r->ret) ADD(" ret T=%08x R=%08x", t->ret, r->ret);
+    if (t->df != r->df) ADD(" df");
+    if (t->ftop != r->ftop) ADD(" ftop T=%u R=%u", t->ftop, r->ftop);
+    else
+        for (uint32_t k = r->ftop; k != ftop_in; k = (k + 1) & 7)
+            if (memcmp(t->st[k], r->st[k], 10)) { ADD(" st[%u]", k); break; }
+    if (slots_on) {
+        int ns = nslots(entry, r->r[4]);
+        for (int k = 0; k <= ns; k++) {
+            if (t->slot[k] == r->slot[k]) continue;
+            if (k) ADD(" slot%d T=%08x R=%08x (in %08x)", k - 1, t->slot[k], r->slot[k], pre[k]);
+            else ADD(" retslot T=%08x R=%08x (in %08x)", t->slot[k], r->slot[k], pre[k]);
+        }
+    }
+    /* SSE and MMX: the translation keeps them in the CPU record at every call and return, so a caller
+       reads what its callee left there (bit for bit: NaN payloads and signed zeros count) */
+    for (int k = 0; k < 8; k++)
+        if (memcmp(t->xmm[k], r->xmm[k], 16)) {
+            uint32_t a[4], b[4];
+            memcpy(a, t->xmm[k], 16);
+            memcpy(b, r->xmm[k], 16);
+            ADD(" xmm%d T=%08x:%08x:%08x:%08x R=%08x:%08x:%08x:%08x", k, a[3], a[2], a[1], a[0], b[3], b[2], b[1], b[0]);
+        }
+    for (int k = 0; k < 8; k++)
+        if (t->mm[k] != r->mm[k]) ADD(" mm%d T=%016llx R=%016llx", k, (unsigned long long)t->mm[k], (unsigned long long)r->mm[k]);
+    if (t->mxcsr != r->mxcsr) ADD(" mxcsr T=%08x R=%08x", t->mxcsr, r->mxcsr);
+    if (e->fmask && ((t->eflags ^ r->eflags) & e->fmask))
+        ADD(" flags T=%03x R=%03x (its callers read %03x)", t->eflags & e->fmask, r->eflags & e->fmask, e->fmask);
+    return len;
+}
+
+/* ------------------------------------------------------------------ the memory written */
+static int sd_clear(void)
+{
+    int fd = open("/proc/self/clear_refs", O_WRONLY);
+    if (fd < 0) return -1;
+    int ok = write(fd, "4", 1) == 1;
+    close(fd);
+    return ok ? 0 : -1;
+}
+typedef struct { int fd; uint32_t *list; uint32_t n; } SdWalk;
+static void sd_range(SdWalk *w, uint32_t base, uint32_t size)
+{
+    uint64_t pm[512], end = (uint64_t)base + size;
+    for (uint64_t a = base & ~(uint64_t)(PAGE - 1); a < end;) {
+        uint64_t n = (end - a + PAGE - 1) / PAGE;
+        if (n > 512) n = 512;
+        ssize_t got = pread(w->fd, pm, (size_t)n * 8, (off_t)(GP((uint32_t)a) / PAGE) * 8);
+        if (got <= 0) break;
+        n = (uint64_t)got / 8;
+        for (uint64_t k = 0; k < n; k++)
+            if ((pm[k] >> 55) & 1) {
+                if (w->list[0] < MAXDIRTY) w->list[2 + w->list[0]++] = (uint32_t)(a + k * PAGE);
+                else w->list[1] = 1;
+            }
+        a += n * PAGE;
+    }
+    w->n++;
+}
+static void sd_cb(void *u, uint32_t base, uint32_t size, int kind)
+{
+    if (kind != 3) sd_range(u, base, size);   /* (thread stacks: the calling thread's, below) */
+}
+/* the guest pages this process wrote since its last sd_clear: the image, DLLs, regions, this
+   thread's stack; returns the number of ranges */
+static uint32_t sd_collect(int fd, uint32_t *list, const CPU *c)
+{
+    list[0] = list[1] = 0;
+    SdWalk w = {fd, list, 0};
+    mem_walk(sd_cb, &w);
+    if (c->stack_hi > c->stack_lo) sd_range(&w, c->stack_lo, c->stack_hi - c->stack_lo);
+    return w.n;
+}
+static int u32cmp(const void *a, const void *b)
+{
+    uint32_t x = *(const uint32_t *)a, y = *(const uint32_t *)b;
+    return x < y ? -1 : x > y;
+}
+static int page_read(pid_t p, uint32_t a, uint8_t *out)
+{
+    struct iovec l = {out, PAGE}, r = {(void *)GP(a), PAGE};
+    return process_vm_readv(p, &l, 1, &r, 1, 0) == (ssize_t)PAGE ? 0 : -1;
+}
+/* the pages either side wrote, A's copy (process pa) against B's (pb): differences outside the dead
+   stack below the call appended to buf; *dead counts the dead stack's */
+static int mem_diff(pid_t pa, pid_t pb, const uint32_t *la, const uint32_t *lb, uint32_t entry, uint32_t stack_lo,
+                    char *buf, int len, int cap, int *dead)
+{
+    *dead = 0;
+    if (la[1] || lb[1]) { ADD(" mem: more than %u pages written, not compared", MAXDIRTY); return len; }
+    uint32_t n = la[0] + lb[0], m = 0, shown = 0, more = 0;
+    uint32_t *u = malloc(((size_t)n + 1) * 4);
+    if (!u) return len;
+    memcpy(u, la + 2, (size_t)la[0] * 4);
+    memcpy(u + la[0], lb + 2, (size_t)lb[0] * 4);
+    qsort(u, n, 4, u32cmp);
+    for (uint32_t k = 0; k < n; k++) if (!m || u[k] != u[m - 1]) u[m++] = u[k];
+    static uint8_t pa_[PAGE], pb_[PAGE];
+    for (uint32_t k = 0; k < m; k++) {
+        uint32_t a = u[k];
+        int ea = page_read(pa, a, pa_), eb = page_read(pb, a, pb_);
+        if (ea || eb) {
+            if (ea != eb) { if (shown < 8) { ADD(" mem %08x readable only in %s", a, ea ? "R" : "T"); shown++; } else more++; }
+            continue;
+        }
+        if (!memcmp(pa_, pb_, PAGE)) continue;
+        if (a + PAGE <= entry && a >= stack_lo) { (*dead)++; continue; }
+        uint32_t i = 0, j = PAGE - 1;
+        while (pa_[i] == pb_[i]) i++;
+        while (pa_[j] == pb_[j]) j--;
+        if (a < entry && a + PAGE > entry && a + j < entry) { (*dead)++; continue; }
+        if (shown >= 8) { more++; continue; }
+        uint32_t at = i & ~3u, x, y;
+        memcpy(&x, pa_ + at, 4);
+        memcpy(&y, pb_ + at, 4);
+        ADD(" mem %08x..%08x T=%08x R=%08x", a + i, a + j, x, y);
+        shown++;
+    }
+    if (more) ADD(" (+%u pages)", more);
+    free(u);
+    return len;
+}
+
+/* ------------------------------------------------------------------ the children */
+static void run_orig(Ent *e, CPU *c)
+{
+    if (e->orig) e->orig(c);
+    else icall(c, e->d->addr);
+}
+
+/* AUDIT_TAINT: the inputs a taint run sets, by variant: quiet NaNs with payloads all their own,
+   negative ones, minus zero, the smallest denormals (positive and negative by turns) */
+static const char *const tv_name[4] = {"nan", "-nan", "-0", "denormal"};
+static uint32_t tv_value(int v, int idx)
+{
+    switch (v) {
+    case 0: return 0x7fc00000u | (uint32_t)(idx + 1);
+    case 1: return 0xffc00000u | (uint32_t)(0x100 + idx);
+    case 2: return 0x80000000u;
+    default: return (idx & 1 ? 0x80000000u : 0) | (uint32_t)(1 + (idx >> 1));
+    }
+}
+static void taint_apply(const Ent *e, CPU *c, int v)
+{
+    uint32_t entry = c->esp;
+    int idx = 0;
+    for (int k = 0; k < 8; k++) {           /* every xmm lane: a leftover a function should not read */
+        uint32_t q[4];
+        for (int l = 0; l < 4; l++) q[l] = tv_value(v, idx++);
+        memcpy(&c->xmm[k], q, 16);
+    }
+    for (int k = 0; k < e->nti; k++) {
+        uint32_t at = 0;
+        if (e->ti[k].kind == 'a') at = entry + 4u * (uint32_t)(e->ti[k].n + 1);
+        else if (e->ti[k].kind == 't') at = c->ecx ? c->ecx + e->ti[k].off : 0;
+        else { uint32_t p = R32(entry + 4u * (uint32_t)(e->ti[k].n + 1)); at = p ? p + e->ti[k].off : 0; }
+        if (at >= 0x10000u) W32(at, tv_value(v, idx++));
+    }
+}
+
+/* a forked child's whole life: role 0 the audit's translation, 1 a taint run's translation, 2 a taint
+   run's rewrite (its own declining: the translation). With child_mem it lists the pages it wrote
+   and waits to be killed, so the parent can read them. */
+static __attribute__((noreturn)) void child_body(int i, CPU *c, int role, uint32_t *list, int tid0, int tv)
+{
+    Ent *e = &ents[i];
+    sync_fork_child(tid0);              /* (a critical section this call holds: re-entered in the child) */
+    in_child = 1; child_idx = role == 2 ? -1 : i; fncheck_solo = 1;
+    int pm = -1;
+    if (child_mem && sd_clear() == 0) pm = open("/proc/self/pagemap", O_RDONLY);
+    if (isolate && child_isolate()) shm->noiso = 1;
+    icall_hook = child_icall;           /* no Direct3D, sound or network in the child */
+    uint32_t entry = c->esp;
+    if (tv >= 0) taint_apply(e, c, tv);
+    if (role == 2) { if (!e->d->fn(c)) run_orig(e, c); }
+    else run_orig(e, c);
+    out_fill(shm, c, entry);
+    if (list) {
+        if (pm >= 0) shm->nregions = sd_collect(pm, list, c);
+        else list[0] = 0, list[1] = 1;
+    }
+    __atomic_store_n(&shm->done, 1, __ATOMIC_RELEASE);
+    if (child_mem) for (;;) pause();
+    _exit(0);
+}
+static void reap(pid_t pid)
+{
+    kill(pid, SIGKILL);
+    waitpid(pid, NULL, 0);
+}
+
+/* the parent waits for the child at shm: 1 its result is there (with child_mem it is still alive,
+   *alive set), 0 none (shm->done, *blocked and *timed_out say why) */
+static int child_wait(pid_t pid, Ent *e, int *blocked, int *timed_out, int *alive)
+{
+    int ws = 0, ok = 0;
+    *blocked = -1; *timed_out = 0; *alive = 0;
+    struct timespec t0, t1, d = {0, 200000};
+    clock_gettime(CLOCK_MONOTONIC, &t0);
+    uint32_t seen = 0;
+    double seen_at = 0;
+    for (;;) {
+        if (child_mem && __atomic_load_n(&shm->done, __ATOMIC_ACQUIRE) == 1) { *alive = 1; return 1; }
+        pid_t w = waitpid(pid, &ws, WNOHANG);
+        if (w == pid) { ok = shm->done == 1; if (shm->done >= 2) e->dead = 1; break; }
+        clock_gettime(CLOCK_MONOTONIC, &t1);
+        double el = (double)(t1.tv_sec - t0.tv_sec) + (double)(t1.tv_nsec - t0.tv_nsec) / 1e9;
+        if (el >= 2) { kill(pid, SIGKILL); waitpid(pid, &ws, 0); *timed_out = 1; break; }
+        /* a child asleep in the kernel with no progress for 0.2 s waits on something only a thread
+           the fork didn't copy would release (a lock, an event): ended now, with the call it is in */
+        if (shm->progress != seen) { seen = shm->progress; seen_at = el; }
+        else if (el - seen_at >= 0.2) {
+            int nr = child_blocked(pid);
+            if (nr >= 0) { *blocked = nr; kill(pid, SIGKILL); waitpid(pid, &ws, 0); *timed_out = 1; break; }
+            seen_at = el;
+        }
+        nanosleep(&d, NULL);
+        if (d.tv_nsec < 20000000) d.tv_nsec *= 2;
+    }
+    return ok;
+}
+static void why_of(char *why, size_t n, const Out *o, int blocked, int timed_out)
+{
+    if (o->done == 2) snprintf(why, n, "thunk");
+    else if (o->done == 3) snprintf(why, n, "sys:%s", sys_name(o->sys));
+    else if (blocked >= 0) snprintf(why, n, "blocked:%s progress=%u", sys_name(blocked), o->progress);
+    else if (timed_out) snprintf(why, n, "timeout progress=%u", o->progress);
+    else snprintf(why, n, "ended");
+}
+
+/* AUDIT_TAINT: the translation and the rewrite each in a child of its own, from the same state with
+   the same tainted inputs (the parent runs neither: its run goes on untouched) */
+static void taint_run(int i, CPU *c)
+{
+    Ent *e = &ents[i];
+    int v = e->tainted++ & 3, tid0 = (int)gettid();
+    uint32_t entry = c->esp, ftop_in = c->ftop, pre[NSLOT];
+    for (int k = 0; k < NSLOT; k++) pre[k] = R32(entry + 4u * (uint32_t)k);
+    FdSet fds;
+    fds_save(&fds);
+    pid_t pid[2] = {0, 0};
+    int ok[2] = {0, 0}, alive[2] = {0, 0}, blocked[2], tmo[2];
+    Out o[2];
+    int was_mem = child_mem;
+    child_mem = mem_on && !mem_busy;
+    for (int w = 0; w < 2; w++) {
+        shm = &shm_base[1 + w];
+        memset(shm, 0, sizeof *shm);
+        fflush(NULL);
+        pid[w] = fork();
+        if (pid[w] == 0) child_body(i, c, 1 + w, child_mem ? dirty[1 + w] : NULL, tid0, v);
+        if (pid[w] < 0) break;
+        ok[w] = child_wait(pid[w], e, &blocked[w], &tmo[w], &alive[w]);
+        o[w] = *shm;
+        fds_restore(&fds);
+        if (!ok[w]) break;
+    }
+    shm = &shm_base[0];
+    if (e->dead) e->dead = 0;           /* (a taint run's failure doesn't end the audit's) */
+    char buf[2400];
+    int len = 0, cap = (int)sizeof buf;
+    if (ok[0] && ok[1]) {
+        len = reg_diff(e, &o[0], &o[1], ftop_in, entry, pre, buf, len, cap);
+        if (child_mem) {
+            int dead = 0;
+            len = mem_diff(pid[0], pid[1], dirty[1], dirty[2], entry, c->stack_lo, buf, len, cap, &dead);
+            if (o[0].nregions != o[1].nregions) ADD(" regions T=%u R=%u", o[0].nregions, o[1].nregions);
+            if (len && dead) ADD(" (and %d dead-stack pages)", dead);
+        }
+        if (outf) {
+            fprintf(outf, "%08x TAINT n=%d v=%s%s\n", e->d->addr, e->n, tv_name[v], len ? buf : " same");
+            fflush(outf);
+        }
+    } else if (outf) {
+        int w = ok[0] ? 1 : 0;
+        char why[80];
+        if (pid[w] < 0) snprintf(why, sizeof why, "fork");
+        else why_of(why, sizeof why, &o[w], blocked[w], tmo[w]);
+        fprintf(outf, "%08x TAINT n=%d v=%s nochild %s why=%s\n", e->d->addr, e->n, tv_name[v], w ? "R" : "T", why);
+        fflush(outf);
+    }
+    for (int w = 0; w < 2; w++) if (alive[w]) reap(pid[w]);
+    child_mem = was_mem;
+}
+
 static int fork_audit(int i, CPU *c)
 {
     Ent *e = &ents[i];
@@ -442,55 +779,24 @@ static int fork_audit(int i, CPU *c)
     if (!want(e, ret))
         return e->d->fn(c);
     if (e->audited++ == 0 && outf) { fprintf(outf, "%08x REACHED\n", e->d->addr); fflush(outf); }
-    CPU in = *c;
+    if (e->taint && e->tainted < 4) taint_run(i, c);
+    uint32_t ftop_in = c->ftop, eax_in = c->eax, ecx_in = c->ecx;
     uint32_t pre[NSLOT];
     for (int k = 0; k < NSLOT; k++) pre[k] = R32(entry + 4u * (uint32_t)k);
     FdSet fds;
     fds_save(&fds);
+    shm = &shm_base[0];
     memset(shm, 0, sizeof *shm);
+    int memhere = mem_on && !mem_busy;  /* (an audit inside a rewrite being compared: registers only) */
+    child_mem = memhere;
     fflush(NULL);                       /* (the child must not write the parent's buffers twice) */
     int tid0 = (int)gettid();
     pid_t pid = fork();
-    if (pid < 0) { e->dead = 1; return e->d->fn(c); }
-    if (pid == 0) {
-        sync_fork_child(tid0);          /* (a critical section this call holds: re-entered in the child) */
-        in_child = 1; child_idx = i; fncheck_solo = 1;
-        if (isolate && child_isolate()) shm->noiso = 1;
-        icall_hook = child_icall;       /* no Direct3D, sound or network in the child */
-        if (e->orig)
-            e->orig(c);
-        else
-            icall(c, e->d->addr);
-        uint32_t *rr = &c->eax;
-        for (int k = 0; k < 8; k++) shm->r[k] = rr[k];
-        shm->ret = c->ret; shm->ftop = c->ftop; shm->df = c->df;
-        for (int k = 0; k < 8; k++) memcpy(shm->st[k], &c->st[k], 10);
-        for (int k = 0; k < NSLOT; k++) shm->slot[k] = R32(entry + 4u * (uint32_t)k);
-        shm->done = 1;
-        _exit(0);
-    }
-    int ws = 0, ok = 0, timed_out = 0, blocked = -1;
-    struct timespec t0, t1, d = {0, 200000};
-    clock_gettime(CLOCK_MONOTONIC, &t0);
-    uint32_t seen = 0;
-    double seen_at = 0;
-    for (;;) {
-        pid_t w = waitpid(pid, &ws, WNOHANG);
-        if (w == pid) { ok = shm->done == 1; if (shm->done >= 2) e->dead = 1; break; }
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        double el = (double)(t1.tv_sec - t0.tv_sec) + (double)(t1.tv_nsec - t0.tv_nsec) / 1e9;
-        if (el >= 2) { kill(pid, SIGKILL); waitpid(pid, &ws, 0); timed_out = 1; break; }
-        /* a child asleep in the kernel with no progress for 0.2 s waits on something only a thread
-           the fork didn't copy would release (a lock, an event): ended now, with the call it is in */
-        if (shm->progress != seen) { seen = shm->progress; seen_at = el; }
-        else if (el - seen_at >= 0.2) {
-            int nr = child_blocked(pid);
-            if (nr >= 0) { blocked = nr; kill(pid, SIGKILL); waitpid(pid, &ws, 0); timed_out = 1; break; }
-            seen_at = el;
-        }
-        nanosleep(&d, NULL);
-        if (d.tv_nsec < 20000000) d.tv_nsec *= 2;
-    }
+    if (pid < 0) { e->dead = 1; child_mem = 0; return e->d->fn(c); }
+    if (pid == 0) child_body(i, c, 0, memhere ? dirty[0] : NULL, tid0, -1);
+    int blocked, timed_out, alive;
+    int ok = child_wait(pid, e, &blocked, &timed_out, &alive);
+    child_mem = 0;
     fds_restore(&fds);
     Out o = *shm;                       /* (the rewrite's own nested audits reuse shm) */
     if (o.noiso && isolate) {
@@ -499,56 +805,53 @@ static int fork_audit(int i, CPU *c)
                                 "their file writes reach the user folder\n");
     }
     if (!ok && ++e->timeouts >= 1) e->dead = 1;
+    uint32_t *theirs = NULL;            /* (the child's page list, copied: nested audits reuse dirty[0]) */
+    if (memhere && ok && dirty[0][1] == 0) {
+        theirs = malloc(((size_t)dirty[0][0] + 2) * 4);
+        if (theirs) memcpy(theirs, dirty[0], ((size_t)dirty[0][0] + 2) * 4);
+    }
+    int compare_mem = memhere && ok && sd_clear() == 0;
+    if (compare_mem) mem_busy++;
     int r = e->d->fn(c);
+    if (compare_mem) mem_busy--;
     if (!r || !ok) {
+        if (alive) reap(pid);
+        free(theirs);
         if (!ok && outf && e->logged < 8) {
             e->logged++;
             char why[80];
-            if (o.done == 2) snprintf(why, sizeof why, "thunk");
-            else if (o.done == 3) snprintf(why, sizeof why, "sys:%s", sys_name(o.sys));
-            else if (blocked >= 0) snprintf(why, sizeof why, "blocked:%s progress=%u", sys_name(blocked), o.progress);
-            else snprintf(why, sizeof why, "%s", timed_out ? "timeout" : "ended");
-            if (timed_out && blocked < 0) {   /* (still working at 2 s: how far it got) */
-                size_t wl = strlen(why);
-                snprintf(why + wl, sizeof why - wl, " progress=%u", o.progress);
-            }
+            why_of(why, sizeof why, &o, blocked, timed_out);
             fprintf(outf, "%08x NOCHILD n=%d ret=%08x dead=%d why=%s%s\n", e->d->addr, e->n, ret, e->dead, why,
                     r ? "" : " (rewrite declined)");
             fflush(outf);
         }
         return r;
     }
-    static const char *nm[8] = {"eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi"};
-    char buf[1400];
-    int len = 0;
-    uint32_t *rr = &c->eax;
-    for (int k = 0; k < 8; k++) {
-        if (k == 1 || k == 2) continue;
-        if (o.r[k] != rr[k])
-            len += snprintf(buf + len, sizeof buf - len, " %s T=%08x R=%08x", nm[k], o.r[k], rr[k]);
-    }
-    if (o.ret != c->ret) len += snprintf(buf + len, sizeof buf - len, " ret T=%08x R=%08x", o.ret, c->ret);
-    if (o.df != c->df) len += snprintf(buf + len, sizeof buf - len, " df");
-    if (o.ftop != c->ftop) len += snprintf(buf + len, sizeof buf - len, " ftop T=%u R=%u", o.ftop, c->ftop);
-    else
-        for (uint32_t k = c->ftop; k != in.ftop; k = (k + 1) & 7)
-            if (memcmp(o.st[k], &c->st[k], 10)) { len += snprintf(buf + len, sizeof buf - len, " st[%u]", k); break; }
-    if (slots_on) {
-        int ns = nslots(entry, c->esp);
-        for (int k = 0; k <= ns && len < (int)sizeof buf - 64; k++) {
-            uint32_t now = R32(entry + 4u * (uint32_t)k);
-            if (o.slot[k] == now) continue;
-            if (k) len += snprintf(buf + len, sizeof buf - len, " slot%d T=%08x R=%08x (in %08x)", k - 1, o.slot[k], now, pre[k]);
-            else len += snprintf(buf + len, sizeof buf - len, " retslot T=%08x R=%08x (in %08x)", o.slot[k], now, pre[k]);
+    Out q;
+    out_fill(&q, c, entry);
+    char buf[2400];
+    int len = 0, cap = (int)sizeof buf;
+    len = reg_diff(e, &o, &q, ftop_in, entry, pre, buf, len, cap);
+    if (compare_mem) {
+        int dead = 0;
+        if (!theirs) ADD(" mem: more than %u pages written, not compared", MAXDIRTY);
+        else {
+            q.nregions = sd_collect(pm_fd, dirty_mine, c);
+            len = mem_diff(pid, getpid(), theirs, dirty_mine, entry, c->stack_lo, buf, len, cap, &dead);
+            if (o.nregions != q.nregions) ADD(" regions T=%u R=%u", o.nregions, q.nregions);
+            if (len && dead) ADD(" (and %d dead-stack pages)", dead);
         }
     }
+    if (alive) reap(pid);
+    free(theirs);
     if (len && outf && e->logged < 12) {
         e->logged++;
-        fprintf(outf, "%08x DIFF n=%d ret=%08x eax_in=%08x ecx_in=%08x%s\n", e->d->addr, e->n, ret, in.eax, in.ecx, buf);
+        fprintf(outf, "%08x DIFF n=%d ret=%08x eax_in=%08x ecx_in=%08x%s\n", e->d->addr, e->n, ret, eax_in, ecx_in, buf);
         fflush(outf);
     }
     return r;
 }
+#undef ADD
 
 /* the calls of audited functions running on this thread, outermost first (frames left without
    coming back through the wrapper, unwound past or longjmp'd over, drop out by their esp) */
@@ -732,6 +1035,57 @@ __attribute__((constructor)) static void audit_env(void)
     }
 }
 
+/* AUDIT_MEM: the soft-dirty bits work here (a page written after a clear shows, one not written
+   doesn't); the shared page lists made */
+static int softdirty_init(void)
+{
+    uint8_t *pg = mmap(NULL, 2 * PAGE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (pg == MAP_FAILED) return 0;
+    pg[0] = pg[PAGE] = 1;
+    int fd = open("/proc/self/pagemap", O_RDONLY);
+    uint64_t e[2] = {0, 0};
+    int ok = fd >= 0 && sd_clear() == 0;
+    if (ok) {
+        pg[0] = 2;
+        ok = pread(fd, e, 16, (off_t)((uintptr_t)pg / PAGE) * 8) == 16 && ((e[0] >> 55) & 1) && !((e[1] >> 55) & 1);
+    }
+    munmap(pg, 2 * PAGE);
+    if (!ok) { if (fd >= 0) close(fd); return 0; }
+    pm_fd = fd;
+    size_t sz = ((size_t)MAXDIRTY + 2) * 4;
+    for (int k = 0; k < 3; k++) {
+        dirty[k] = mmap(NULL, sz, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        if (dirty[k] == MAP_FAILED) return 0;
+    }
+    dirty_mine = mmap(NULL, sz, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    return dirty_mine != MAP_FAILED;
+}
+
+/* AUDIT_TAINT_ARGS "addr:a0,t8,p1+4;addr:..." : a function's float inputs a taint run sets */
+static void taint_items(Ent *e)
+{
+    const char *s = port_getenv("AUDIT_TAINT_ARGS");
+    while (s && *s) {
+        char *q;
+        unsigned long a = strtoul(s, &q, 16);
+        if (q == s) break;
+        s = q;
+        if (*s == ':') s++;
+        while (*s && *s != ';') {
+            char kind = *s++;
+            unsigned long n = strtoul(s, &q, 10), off = 0;
+            s = q;
+            if (kind == 't') off = n, n = 0;
+            if (kind == 'p' && *s == '+') off = strtoul(s + 1, &q, 0), s = q;
+            if (a == e->d->addr && (kind == 'a' || kind == 't' || kind == 'p') && e->nti < 16) {
+                e->ti[e->nti].kind = kind; e->ti[e->nti].n = (int)n; e->ti[e->nti].off = (uint32_t)off; e->nti++;
+            }
+            while (*s == ',' || *s == ' ') s++;
+        }
+        if (*s == ';') s++;
+    }
+}
+
 static void audit_init(void)
 {
     state = 0;
@@ -752,13 +1106,23 @@ static void audit_init(void)
     char def[1100];
     snprintf(def, sizeof def, "%s/audit.txt", user_dir);
     outf = fopen(o && *o ? o : def, "a");
-    shm = mmap(NULL, sizeof *shm, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    if (shm == MAP_FAILED) fatal("audit: no shared memory: %s", strerror(errno));
+    shm_base = mmap(NULL, 3 * sizeof *shm, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    if (shm_base == MAP_FAILED) fatal("audit: no shared memory: %s", strerror(errno));
+    shm = shm_base;
+    const char *mv = port_getenv("AUDIT_MEM");
+    if (mv && *mv && strcmp(mv, "0")) mem_on = softdirty_init();
+    const char *tv = port_getenv("AUDIT_TAINT");
+    taint_all = tv && !strcasecmp(tv, "all");
     const char *s = port_getenv("AUDIT_SLOTS"), *iso = port_getenv("AUDIT_ISOLATE");
     slots_on = s && *s && strcmp(s, "0") != 0;
     if (iso && !strcmp(iso, "0")) isolate = 0;
-    LOG(LOG_ALWAYS, "rewrite: register audit on%s%s, report in %s", slots_on ? " (argument slots too)" : "",
+    LOG(LOG_ALWAYS, "rewrite: register audit on%s%s%s%s, report in %s", slots_on ? " (argument slots too)" : "",
+        mem_on ? " (memory written too)" : "", tv && *tv ? " (taint runs)" : "",
         isolate ? "" : " (children not isolated)", o && *o ? o : def);
+    if (outf && !flags_out_table)
+        fprintf(outf, "# flags not compared: the translation has no flags_out_table (translated before AntiStatic v0.2.60)\n");
+    if (outf && mv && *mv && strcmp(mv, "0") && !mem_on)
+        fprintf(outf, "# memory not compared: the kernel's soft-dirty page bits are not available here\n");
 }
 
 /* rewrite_install's choice for each rewrite: itself, or (<PORT_ENV>_AUDIT=1 / _AUDIT_LOG) its wrapper */
@@ -786,6 +1150,17 @@ int (*rewrite_audit_wrap(const DecompEntry *d))(CPU *)
     }
     Ent *e = &ents[nents];
     e->d = d;
+    if (flags_out_table)
+        for (const uint32_t *f = flags_out_table; f[0]; f += 2)
+            if (f[0] == d->addr) {
+                static const uint32_t bit[6] = {1u << 0, 1u << 2, 1u << 4, 1u << 6, 1u << 7, 1u << 11};
+                for (int k = 0; k < 6; k++) if (f[1] & (1u << k)) e->fmask |= bit[k];
+            }
+    if (state == 1 && !logmode) {
+        const char *tv = port_getenv("AUDIT_TAINT");
+        e->taint = taint_all || (tv && *tv && in_only(tv, d->addr));
+        if (e->taint) taint_items(e);
+    }
     char name[32];
     snprintf(name, sizeof name, "F_%08x_orig", d->addr);
     e->orig = (void (*)(CPU *))dlsym(RTLD_DEFAULT, name);

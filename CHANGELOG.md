@@ -3,6 +3,29 @@
 "Regenerate" means a port moving to this version should translate its game again (the generated
 C changes).
 
+## v0.2.60 (2026-11-26)
+
+- **The register audit compares more** (runtime/rewrite/audit.c, `<PORT_ENV>_AUDIT=1`; asked for by a
+  port whose rewrite trial passed rewrites that an end-of-frame comparison can't tell apart):
+  - **xmm0-7, mm0-7 and MXCSR**, always, bit for bit (NaN payloads and signed zeros count): the
+    translation keeps them in the CPU record at every call and return, so a caller reads what its
+    callee left there.
+  - **The flags** of a function whose callers read them after it: the translator now writes
+    `flags_out_table` into table.c. Translated before this release: the report says flags aren't
+    compared; regenerate to have them.
+  - **`<PORT_ENV>_AUDIT_MEM=1`: the memory each side wrote**, by the kernel's soft-dirty page bits
+    (the image, DLLs, regions, the calling thread's stack), page by page: ` mem A..B T=.. R=..`; the
+    dead stack below the call only counted.
+  - **`<PORT_ENV>_AUDIT_TAINT=all|addr,...`: taint runs.** On a function's first four audited calls,
+    the translation and the rewrite each in a child of its own, with every xmm lane and the float
+    inputs `<PORT_ENV>_AUDIT_TAINT_ARGS` names (`addr:a0,t8,p1+4`) set to NaNs with payloads of their
+    own, negative NaNs, -0 or denormals: an operand order or a zero or NaN case a route never gives.
+    `ADDR TAINT n=.. v=nan same` or its differences.
+  - docs/REWRITE.md "The register audit"; the stub game's tests catch an xmm leftover, a stray write
+    and a NaN-only bug, and stay silent on the clean rewrite.
+- Regenerate only to have flags compared (table.c gains `flags_out_table`; the generated functions
+  are unchanged). No baselines to re-record: the audit is off unless asked for.
+
 ## v0.2.59 (2026-11-24)
 
 - **Option `screen`: the screen full screen goes to** (win.c: on a PC with three
